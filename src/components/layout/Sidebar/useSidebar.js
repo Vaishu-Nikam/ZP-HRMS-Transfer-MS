@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAppDispatch } from "../../../redux/hooks";
-import { logoutUser } from "../../../redux/slices/authSlice";
+import { logoutUser} from "../../../redux/slices/authSlice";
 
 export const useSidebar = () => {
   const dispatch = useAppDispatch();

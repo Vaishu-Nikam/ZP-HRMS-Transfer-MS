@@ -1,3 +1,4 @@
+// src/routes/AppRouter.jsx
 import React, { Suspense } from 'react';
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { Layout } from '../components/layout/Layout';
@@ -14,9 +15,8 @@ const RoleAdd = React.lazy(() => import('../pages/roles/RoleAdd'));
 const RoleEdit = React.lazy(() => import('../pages/roles/RoleEdit'));
 const ChangePassword = React.lazy(() => import('../pages/auth/ChangePassword'));
 const MasterRoutes = React.lazy(() => import('../routes/masterRoutes'));
+const EmployeeRoutes = React.lazy(() => import('../routes/EmployeeRoutes')); 
 
-
-const EmployeeList = React.lazy(() => import('../pages/employees/EmployeeList'));
 const RosterPage = React.lazy(() => import('../pages/roster/RosterPage'));
 const TransferPage = React.lazy(() => import('../pages/transfer/TransferPage'));
 const AppraisalPage = React.lazy(() => import('../pages/appraisal/AppraisalPage'));
@@ -110,9 +110,6 @@ const router = createBrowserRouter([
         ],
       },
      
-    
-     
-     
       {
         path: 'change-password',
         element: (
@@ -129,69 +126,64 @@ const router = createBrowserRouter([
           </Suspense>
         ),
       },
-     
+
+      // ✅ Employees
+      {
+        path: 'employees/*',
+        element: (
+          <Suspense fallback={<div className="p-6">Loading...</div>}>
+            <EmployeeRoutes />
+          </Suspense>
+        ),
+      },
+
+      // ✅ Roster
+      {
+        path: 'roster',
+        element: (
+          <Suspense fallback={<div className="p-6">Loading...</div>}>
+            <RosterPage />
+          </Suspense>
+        ),
+      },
+
+      // ✅ Transfer
+      {
+        path: 'transfer',
+        element: (
+          <Suspense fallback={<div className="p-6">Loading...</div>}>
+            <TransferPage />
+          </Suspense>
+        ),
+      },
+
+      // ✅ Appraisal
+      {
+        path: 'appraisal',
+        element: (
+          <Suspense fallback={<div className="p-6">Loading...</div>}>
+            <AppraisalPage />
+          </Suspense>
+        ),
+      },
+
+      // ✅ Reports
+      {
+        path: 'reports',
+        element: (
+          <Suspense fallback={<div className="p-6">Loading...</div>}>
+            <ReportsPage />
+          </Suspense>
+        ),
+      },
+
       {
         path: '*',
         element: <Navigate to="/" replace />,
       },
-
-
-
-
-
-// ✅ Employees
-{
-  path: 'employees',
-  element: (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
-      <EmployeeList />
-    </Suspense>
-  ),
-},
-
-// ✅ Roster
-{
-  path: 'roster',
-  element: (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
-      <RosterPage />
-    </Suspense>
-  ),
-},
-
-// ✅ Transfer
-{
-  path: 'transfer',
-  element: (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
-      <TransferPage />
-    </Suspense>
-  ),
-},
-
-// ✅ Appraisal
-{
-  path: 'appraisal',
-  element: (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
-      <AppraisalPage />
-    </Suspense>
-  ),
-},
-
-// ✅ Reports
-{
-  path: 'reports',
-  element: (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
-      <ReportsPage />
-    </Suspense>
-  ),
-},
-
     ],
   },
-], { basename: '/' }); // ✅ basename fix
+], { basename: '/' });
 
 export const AppRouter = () => {
   return <RouterProvider router={router} />;
