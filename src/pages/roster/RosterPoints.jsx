@@ -55,49 +55,46 @@ const ROSTER_100 = [
 ];
 
 const CAT_BADGE = {
-  Open:   'bg-blue-50 text-blue-700 border-blue-200',
-  SC:     'bg-purple-50 text-purple-700 border-purple-200',
-  ST:     'bg-green-50 text-green-700 border-green-200',
-  OBC:    'bg-orange-50 text-orange-700 border-orange-200',
-  'NT-A': 'bg-pink-50 text-pink-700 border-pink-200',
-  'NT-B': 'bg-rose-50 text-rose-700 border-rose-200',
-  'NT-C': 'bg-red-50 text-red-700 border-red-200',
-  'NT-D': 'bg-yellow-50 text-yellow-700 border-yellow-200',
-  SBC:    'bg-teal-50 text-teal-700 border-teal-200',
+  Open: 'bg-blue-100 text-blue-700',
+  SC: 'bg-purple-100 text-purple-700',
+  ST: 'bg-green-100 text-green-700',
+  OBC: 'bg-orange-100 text-orange-700',
+  'NT-A': 'bg-pink-100 text-pink-700',
+  'NT-B': 'bg-rose-100 text-rose-700',
+  'NT-C': 'bg-red-100 text-red-700',
+  'NT-D': 'bg-yellow-100 text-yellow-700',
+  SBC: 'bg-teal-100 text-teal-700',
 };
 
 const FILTER_TABS = ['', 'Open', 'SC', 'ST', 'OBC', 'NT-A', 'NT-B', 'NT-C', 'NT-D', 'SBC'];
 
 const STAT_CONFIG = [
-  { key: 'filled',  label: 'भरलेले',  color: 'text-green-600' },
-  { key: 'vacant',  label: 'रिक्त',   color: 'text-red-500'   },
-  { key: 'Open',    label: 'Open',    color: 'text-blue-600'  },
-  { key: 'SC',      label: 'SC',      color: 'text-purple-600'},
-  { key: 'ST',      label: 'ST',      color: 'text-green-600' },
-  { key: 'OBC',     label: 'OBC',     color: 'text-orange-600'},
-  { key: 'NT-A',    label: 'NT-A',    color: 'text-pink-600'  },
-  { key: 'NT-B',    label: 'NT-B',    color: 'text-rose-600'  },
-  { key: 'NT-C',    label: 'NT-C',    color: 'text-red-600'   },
-  { key: 'NT-D',    label: 'NT-D',    color: 'text-yellow-600'},
-  { key: 'SBC',     label: 'SBC',     color: 'text-teal-600'  },
+  { key: 'filled', label: 'भरलेले', color: 'text-green-600' },
+  { key: 'vacant', label: 'रिक्त', color: 'text-red-500' },
+  { key: 'Open', label: 'Open', color: 'text-blue-600' },
+  { key: 'SC', label: 'SC', color: 'text-purple-600' },
+  { key: 'ST', label: 'ST', color: 'text-green-600' },
+  { key: 'OBC', label: 'OBC', color: 'text-orange-600' },
 ];
 
 const RosterPoints = () => {
   const [rosterData, setRosterData] = useState({});
-  const [filterCat,  setFilterCat]  = useState('');
+  const [filterCat, setFilterCat] = useState('');
 
   useEffect(() => {
     setRosterData(JSON.parse(localStorage.getItem('roster_data')) || {});
   }, []);
 
-  const filteredRoster = useMemo(() =>
-    ROSTER_100.filter(r => !filterCat || r.category === filterCat),
+  const filteredRoster = useMemo(
+    () => ROSTER_100.filter(r => !filterCat || r.category === filterCat),
     [filterCat]
   );
 
   const stats = useMemo(() => {
     const counts = {};
-    ROSTER_100.forEach(r => { counts[r.category] = (counts[r.category] || 0) + 1; });
+    ROSTER_100.forEach(r => {
+      counts[r.category] = (counts[r.category] || 0) + 1;
+    });
     return counts;
   }, []);
 
@@ -105,137 +102,114 @@ const RosterPoints = () => {
     k => rosterData[k]?.employee_id
   ).length;
 
-  const getStatValue = (key) => {
+  const getStatValue = key => {
     if (key === 'filled') return filledCount;
     if (key === 'vacant') return 100 - filledCount;
     return stats[key] || 0;
   };
 
-  const getCatCount = (cat) => cat === '' ? 100 : (stats[cat] || 0);
-
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
 
-      {/* ── Stat Boxes ── */}
-      <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-11 gap-2">
+      {/* STAT CARDS */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
         {STAT_CONFIG.map(s => (
           <div key={s.key}
-            className="text-center py-2.5 px-1 bg-white border border-gray-200 rounded-lg">
-            <p className={`text-lg font-bold ${s.color}`}>{getStatValue(s.key)}</p>
-            <p className="text-[10px] text-gray-500 mt-0.5 font-medium">{s.label}</p>
+            className="bg-white/80 backdrop-blur border border-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
+            <p className={`text-2xl font-bold ${s.color}`}>
+              {getStatValue(s.key)}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">{s.label}</p>
           </div>
         ))}
       </div>
 
-      {/* ── Progress Bar ── */}
-      <div className="bg-white border border-gray-200 rounded-xl px-4 py-3">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-medium text-gray-600">भरण्याची स्थिती</span>
-          <span className="text-xs font-semibold text-blue-600">{filledCount}/100</span>
+      {/* PROGRESS */}
+      <div className="bg-white/80 backdrop-blur border border-gray-100 rounded-2xl p-5 shadow-sm">
+        <div className="flex justify-between mb-2">
+          <span className="text-sm text-gray-600">भरण्याची स्थिती</span>
+          <span className="text-sm font-semibold text-blue-600">
+            {filledCount}/100
+          </span>
         </div>
-        <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+        <div className="w-full bg-gray-100 rounded-full h-3">
           <div
-            className="h-2 rounded-full bg-blue-500 transition-all duration-500"
+            className="h-3 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500"
             style={{ width: `${filledCount}%` }}
           />
         </div>
-        <div className="flex justify-between text-[10px] text-gray-400 mt-1">
-          <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
-        </div>
       </div>
 
-      {/* ── Button Group Filter + Print ── */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-
-        {/* Button Group */}
-        <div className="flex border border-gray-200 rounded-lg overflow-hidden overflow-x-auto">
-          {FILTER_TABS.map((cat, idx) => (
-            <button
-              key={cat}
-              onClick={() => setFilterCat(cat)}
-              className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap transition-all
-                ${idx !== FILTER_TABS.length - 1 ? 'border-r border-gray-200' : ''}
-                ${filterCat === cat
-                  ? 'bg-slate-800 text-white'
-                  : 'bg-white text-gray-600 hover:bg-gray-50'}`}
-            >
-              {cat || 'सर्व'}
-              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold
-                ${filterCat === cat
-                  ? 'bg-white/20 text-white'
-                  : 'bg-gray-100 text-gray-500'}`}>
-                {getCatCount(cat)}
-              </span>
-            </button>
-          ))}
-        </div>
+      {/* FILTER */}
+      <div className="flex flex-wrap gap-2">
+        {FILTER_TABS.map(cat => (
+          <button
+            key={cat}
+            onClick={() => setFilterCat(cat)}
+            className={`px-4 py-2 rounded-full text-xs font-medium transition
+              ${filterCat === cat
+                ? 'bg-blue-600 text-white shadow'
+                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+          >
+            {cat || 'सर्व'}
+          </button>
+        ))}
       </div>
 
-      {/* ── Table ── */}
-      <div className="rounded-xl border border-gray-200 overflow-hidden">
+      {/* TABLE */}
+      <div className="bg-white/80 backdrop-blur rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-slate-800 text-white">
-              <th className="px-4 py-3 text-left text-xs font-medium w-20">गुण क्र.</th>
-              <th className="px-4 py-3 text-left text-xs font-medium w-28">प्रवर्ग</th>
-              <th className="px-4 py-3 text-left text-xs font-medium">कर्मचारी नाव</th>
-              <th className="px-4 py-3 text-left text-xs font-medium w-32">कोड</th>
-              <th className="px-4 py-3 text-left text-xs font-medium w-32">रुजू दिनांक</th>
-              <th className="px-4 py-3 text-center text-xs font-medium w-24">स्थिती</th>
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-3 text-left text-xs">गुण क्र.</th>
+              <th className="px-4 py-3 text-left text-xs">प्रवर्ग</th>
+              <th className="px-4 py-3 text-left text-xs">कर्मचारी</th>
+              <th className="px-4 py-3 text-left text-xs">कोड</th>
+              <th className="px-4 py-3 text-left text-xs">दिनांक</th>
+              <th className="px-4 py-3 text-center text-xs">स्थिती</th>
             </tr>
           </thead>
+
           <tbody>
-            {filteredRoster.map((row, idx) => {
-              const entry    = rosterData[row.point] || {};
+            {filteredRoster.map(row => {
+              const entry = rosterData[row.point] || {};
               const isFilled = !!entry.employee_id;
-              const badge    = CAT_BADGE[row.category] || CAT_BADGE['Open'];
 
               return (
-                <tr key={row.point}
-                  className={`border-b border-gray-100 hover:bg-blue-50 transition-colors
-                    ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/40'}`}>
+                <tr key={row.point} className="hover:bg-blue-50/50 transition">
+                  <td className="px-4 py-3 font-semibold">{row.point}</td>
 
-                  <td className="px-4 py-2.5">
-                    <span className="text-sm font-semibold text-gray-700">{row.point}</span>
-                  </td>
-
-                  <td className="px-4 py-2.5">
-                    <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full border ${badge}`}>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-1 text-xs rounded-full ${CAT_BADGE[row.category]}`}>
                       {row.category}
                     </span>
                   </td>
 
-                  <td className="px-4 py-2.5">
-                    {isFilled
-                      ? <span className="text-sm text-gray-800">{entry.employee_name}</span>
-                      : <span className="text-xs text-gray-300 italic">रिक्त</span>}
+                  <td className="px-4 py-3">
+                    {isFilled ? entry.employee_name : 'रिक्त'}
                   </td>
 
-                  <td className="px-4 py-2.5">
-                    {isFilled
-                      ? <span className="font-mono text-xs text-gray-500">{entry.employee_code}</span>
-                      : <span className="text-gray-300 text-xs">-</span>}
+                  <td className="px-4 py-3 text-xs text-gray-500">
+                    {entry.employee_code || '-'}
                   </td>
 
-                  <td className="px-4 py-2.5 text-xs text-gray-500">
-                    {isFilled && entry.joining_date
-                      ? new Date(entry.joining_date).toLocaleDateString('mr-IN')
-                      : <span className="text-gray-300">-</span>}
+                  <td className="px-4 py-3 text-xs text-gray-500">
+                    {entry.joining_date || '-'}
                   </td>
 
-                  <td className="px-4 py-2.5 text-center">
-                    <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full border
+                  <td className="px-4 py-3 text-center">
+                    <span className={`px-3 py-1 text-xs rounded-full
                       ${isFilled
-                        ? 'bg-green-50 text-green-700 border-green-200'
-                        : 'bg-red-50 text-red-600 border-red-200'}`}>
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-600'}`}>
                       {isFilled ? 'भरलेले' : 'रिक्त'}
                     </span>
                   </td>
-
                 </tr>
               );
             })}
           </tbody>
+
         </table>
       </div>
 

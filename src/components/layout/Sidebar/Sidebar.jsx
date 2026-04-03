@@ -334,6 +334,27 @@ export const Sidebar = ({ isOpen, onClose }) => {
             </NavLink>
           </PermissionGuard>
 
+          {/* Exel Import */}
+
+            <PermissionGuard permissions="import.view" fallback={null}>
+  <NavLink
+    to="/excel-import"
+    className={({ isActive }) =>
+      cn(
+        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all border-l-4",
+        isActive
+          ? "bg-blue-50 text-blue-700 border-blue-500 shadow-sm"
+          : "text-gray-700 border-transparent hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200"
+      )
+    }
+  >
+    <div className="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-100">
+      <FileText size={17} />
+    </div>
+    Excel Import
+  </NavLink>
+</PermissionGuard>
+
           {/* Reports */}
           <PermissionGuard permissions="reports.view" fallback={null}>
             <NavLink
