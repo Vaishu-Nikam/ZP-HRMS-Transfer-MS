@@ -80,7 +80,7 @@ const SectionHeader = ({ icon: Icon, title, subtitle, note }) => (
 
 const Input = ({ label, name, type = "text", form, set, inputCls, isViewMode }) => (
   <div>
-<label className={labelCls}>      {label}
+    <label className={labelCls}>      {label}
     </label>
     <input
       type={type}
@@ -398,7 +398,7 @@ const AppraisalForm = ({ isViewMode = false }) => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-4">
+              <div  className={labelCls}>
 
                 <div>
                   <p>ठिकाण (Place) -</p>
@@ -416,7 +416,7 @@ const AppraisalForm = ({ isViewMode = false }) => {
                   onClick={() => setActiveSection('self')}
                   className="px-6 py-2.5 bg-blue-600 text-white rounded-xl"
                 >
-                  पुढे →
+                जतन करा आणि पुढे जा →
                 </button>
               </div>
 
@@ -426,12 +426,12 @@ const AppraisalForm = ({ isViewMode = false }) => {
           {/* SELF */}
           {activeSection === 'self' && (
             <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-6">
-             <SectionHeader
-  icon={ClipboardCheck}
-  title="भाग – २ (Section–2)"
-  subtitle="स्वयंमूल्यनिर्धारण अहवाल (Self-Appraisal Report)"
-  note="(To be filled in by officer / employee reported upon and reviewed)"
-/>
+              <SectionHeader
+                icon={ClipboardCheck}
+                title="भाग – २ (Section–2)"
+                subtitle="स्वयंमूल्यनिर्धारण अहवाल (Self-Appraisal Report)"
+                note="(To be filled in by officer / employee reported upon and reviewed)"
+              />
 
               {/* 1 */}
               <div>
@@ -458,8 +458,8 @@ const AppraisalForm = ({ isViewMode = false }) => {
 
               {/* 3 */}
               <div>
-                <label className={questionCls}>           
-                         ३. वर्षभरात / सदर कालावधीत पार पाडलेल्या ४-५ महत्वाच्या व उल्लेखनीय कामांचे संक्षिप्त वर्णन (List 4-5 important and noteworthy works done during the period) (१००० शब्द)
+                <label className={questionCls}>
+                  ३. वर्षभरात / सदर कालावधीत पार पाडलेल्या ४-५ महत्वाच्या व उल्लेखनीय कामांचे संक्षिप्त वर्णन (List 4-5 important and noteworthy works done during the period) (१०० शब्द)
                 </label>
                 <textarea rows="5" className={inputCls}
                   value={form.q3 || ""}
@@ -469,25 +469,25 @@ const AppraisalForm = ({ isViewMode = false }) => {
               </div>
 
               {/* 4 */}
-            <div className="space-y-2">
-  <h4 className={questionCls}>
-    ४. जे उद्दिष्ट पूर्ण होऊ शकले नाहीत, त्याकरिता आलेल्या अडचणी 
-    (Difficulties faced in not achieving certain targets)
-  </h4>
+              <div className="space-y-2">
+                <h4 className={questionCls}>
+                  ४. जे उद्दिष्ट पूर्ण होऊ शकले नाहीत, त्याकरिता आलेल्या अडचणी
+                  (Difficulties faced in not achieving certain targets)
+                </h4>
 
-  <textarea
-    rows="4"
-    className={`${inputCls} resize-none`}
-    value={form.q4 || ""}
-    onChange={(e) => set("q4", e.target.value)}
-    disabled={isViewMode}
-  />
-</div>
+                <textarea
+                  rows="4"
+                  className={`${inputCls} resize-none`}
+                  value={form.q4 || ""}
+                  onChange={(e) => set("q4", e.target.value)}
+                  disabled={isViewMode}
+                />
+              </div>
 
               {/* 5 */}
               <div>
-                <label className={questionCls}>              
-                      ५. कार्यक्षमता वाढविण्यासाठी स्वतःस आवश्यक वाटते असे प्रशिक्षणाचे क्षेत्र (Mention areas of required training which you feel necessary for higher efficiency)
+                <label className={questionCls}>
+                  ५. कार्यक्षमता वाढविण्यासाठी स्वतःस आवश्यक वाटते असे प्रशिक्षणाचे क्षेत्र (Mention areas of required training which you feel necessary for higher efficiency)
                 </label>
                 <textarea rows="4" className={inputCls}
                   value={form.q5 || ""}
@@ -524,7 +524,9 @@ const AppraisalForm = ({ isViewMode = false }) => {
               </div>
 
               {/* Footer */}
-              <div className="grid grid-cols-2 gap-4 pt-4">
+
+
+              <div c className={labelCls}>
 
                 <div>
                   <p>ठिकाण (Place) -</p>
@@ -533,19 +535,18 @@ const AppraisalForm = ({ isViewMode = false }) => {
 
                 <div className="text-right">
                   <p className={footerTextCls}>अधिकाऱ्याची / कर्मचाऱ्याची स्वाक्षरी, नाव व पदनाम</p>
-                  <p className={footerTextCls}>Signature, Name, and Designation of the Officer/Employee</p>
-                </div>
+                  <p className={footerTextCls}>Signature, Name, and Designation of the Officer/Employee</p>       </div>
               </div>
               {/* Buttons */}
               <div className="flex justify-between pt-2">
                 <button onClick={() => setActiveSection('info')}
                   className="px-5 py-2.5 border border-gray-300 text-gray-600 text-sm rounded-xl">
-                  ← मागे
+                  ← मागील पान
                 </button>
 
                 <button onClick={() => setActiveSection('reporting')}
                   className="px-6 py-2.5 bg-blue-600 text-white text-sm rounded-xl">
-                  पुढे →
+                  जतन करा आणि पुढे जा →
                 </button>
               </div>
 
@@ -557,16 +558,16 @@ const AppraisalForm = ({ isViewMode = false }) => {
           {activeSection === 'reporting' && (
             <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-6">
 
-             <SectionHeader
-  icon={Star}
-  title="भाग – ३ (Section 3)"
-  subtitle="प्रतिवेदन अधिकाऱ्यांनी लिहावयाचा मूल्यमापन अहवाल"
-  note="Performance Appraisal Report prepared by reporting officer"
-/>
+              <SectionHeader
+                icon={Star}
+                title="भाग – ३ (Section 3)"
+                subtitle="प्रतिवेदन अधिकाऱ्यांनी लिहावयाचा मूल्यमापन अहवाल"
+                note="Performance Appraisal Report prepared by reporting officer"
+              />
               {/* 1 */}
               <div>
-                <label className={labelCls}>         
-                           १. भाग २ मध्ये नमूद करण्यात आलेल्या स्वयंमूल्यनिर्धारण अहवालाशी आपण सहमत आहात काय? नसल्यास, वस्तुस्थितीदर्शक अभिप्राय द्यावेत.
+                <label className={labelCls}>
+                  १. भाग २ मध्ये नमूद करण्यात आलेल्या स्वयंमूल्यनिर्धारण अहवालाशी आपण सहमत आहात काय? नसल्यास, वस्तुस्थितीदर्शक अभिप्राय द्यावेत.
                   (Whether you agree with self-assessment recorded in part two? If not, then state factual position)
                 </label>
                 <textarea rows="4" className={inputCls}
@@ -602,8 +603,8 @@ const AppraisalForm = ({ isViewMode = false }) => {
 
               {/* 4 */}
               <div>
-                <label className={labelCls}>     
-                               ४. संबंधित अधिकाऱ्यांनी / कर्मचाऱ्यांनी कार्यक्षमता वाढवण्याकरिता आवश्यक असलेल्या प्रशिक्षणाचे बाबत आपण सहमत आहात काय?
+                <label className={labelCls}>
+                  ४. संबंधित अधिकाऱ्यांनी / कर्मचाऱ्यांनी कार्यक्षमता वाढवण्याकरिता आवश्यक असलेल्या प्रशिक्षणाचे बाबत आपण सहमत आहात काय?
                   (Do you agree with the skill up-gradation needs as identified by the officer?)
                 </label>
                 <textarea rows="4" className={inputCls}
@@ -716,88 +717,88 @@ const AppraisalForm = ({ isViewMode = false }) => {
               </div>
 
               {/* 6 */}
-         <div className="space-y-2">
-  <label className={labelCls}>
-    ६. संबंधित अधिकारी/कर्मचारी यांच्या स्वभाव व चारित्र्याबाबत आपले स्पष्ट अभिप्राय द्यावेत 
-    प्रतिकूल अभिप्राय असल्यास त्यासंबंधी उदाहरणे नमूद करावीत 
-    (Offer your remarks on character and integrity (if remarks are negative, then mention instances))
-  </label>
+              <div className="space-y-2">
+                <label className={labelCls}>
+                  ६. संबंधित अधिकारी/कर्मचारी यांच्या स्वभाव व चारित्र्याबाबत आपले स्पष्ट अभिप्राय द्यावेत
+                  प्रतिकूल अभिप्राय असल्यास त्यासंबंधी उदाहरणे नमूद करावीत
+                  (Offer your remarks on character and integrity (if remarks are negative, then mention instances))
+                </label>
 
-  <textarea
-    rows="4"
-    className={`${inputCls} resize-none`}
-    value={form?.r6 || ""}
-    onChange={(e) => set("r6", e.target.value)}
-    disabled={isViewMode}
-  />
-</div>
+                <textarea
+                  rows="4"
+                  className={`${inputCls} resize-none`}
+                  value={form?.r6 || ""}
+                  onChange={(e) => set("r6", e.target.value)}
+                  disabled={isViewMode}
+                />
+              </div>
 
               {/* 7 */}
-            <div className="space-y-2">
-  <label className={labelCls}>
-    ७. अधिकारी/कर्मचारी यांचे एकंदर मूल्यमापन (जास्तीत जास्त १०० शब्द) 
-    (Overall Assessment of officer/employee (Maximum 100 words)) 
-    यामध्ये संबंधित अधिकारीच्या बलस्थान, कमजोरी, त्यांनी केलेली कामगिरी, 
-    महिला व मागासवर्गीयांबाबतचा दृष्टिकोन यांचा समावेश असावा. 
-    (Include Strengths and lesser strengths and his attitude towards disabled persons, women and Backward classes)
-  </label>
+              <div className="space-y-2">
+                <label className={labelCls}>
+                  ७. अधिकारी/कर्मचारी यांचे एकंदर मूल्यमापन (जास्तीत जास्त १०० शब्द)
+                  (Overall Assessment of officer/employee (Maximum 100 words))
+                  यामध्ये संबंधित अधिकारीच्या बलस्थान, कमजोरी, त्यांनी केलेली कामगिरी,
+                  महिला व मागासवर्गीयांबाबतचा दृष्टिकोन यांचा समावेश असावा.
+                  (Include Strengths and lesser strengths and his attitude towards disabled persons, women and Backward classes)
+                </label>
 
-  <textarea
-    rows="4"
-    className={`${inputCls} resize-none`}
-    value={form?.r7 || ""}
-    onChange={(e) => set("r7", e.target.value)}
-    disabled={isViewMode}
-  />
-</div>
+                <textarea
+                  rows="4"
+                  className={`${inputCls} resize-none`}
+                  value={form?.r7 || ""}
+                  onChange={(e) => set("r7", e.target.value)}
+                  disabled={isViewMode}
+                />
+              </div>
 
               {/* 8 */}
-           <div className="space-y-2">
-  <label className={labelCls}>
-    ८. प्रकृतीमान (State of Health) 
-    (खूप चांगले / चांगले / समाधानकारक नाही) 
-    (Very good / Good / Not Good)
-  </label>
+              <div className="space-y-2">
+                <label className={labelCls}>
+                  ८. प्रकृतीमान (State of Health)
+                  (खूप चांगले / चांगले / समाधानकारक नाही)
+                  (Very good / Good / Not Good)
+                </label>
 
-<div className="flex gap-20 ml-8">  
-    <label className="flex items-center gap-2 text-sm text-gray-700">
-      <input
-        type="radio"
-        name="health"
-        value="very_good"
-        checked={form?.health === "very_good"}
-        onChange={(e) => set("health", e.target.value)}
-      />
-      खूप चांगले (Very Good)
-    </label>
+                <div className="flex gap-20 ml-8">
+                  <label className="flex items-center gap-2 text-sm text-gray-700">
+                    <input
+                      type="radio"
+                      name="health"
+                      value="very_good"
+                      checked={form?.health === "very_good"}
+                      onChange={(e) => set("health", e.target.value)}
+                    />
+                    खूप चांगले (Very Good)
+                  </label>
 
-    <label className="flex items-center gap-2 text-sm text-gray-700">
-      <input
-        type="radio"
-        name="health"
-        value="good"
-        checked={form?.health === "good"}
-        onChange={(e) => set("health", e.target.value)}
-      />
-      चांगले (Good)
-    </label>
+                  <label className="flex items-center gap-2 text-sm text-gray-700">
+                    <input
+                      type="radio"
+                      name="health"
+                      value="good"
+                      checked={form?.health === "good"}
+                      onChange={(e) => set("health", e.target.value)}
+                    />
+                    चांगले (Good)
+                  </label>
 
-    <label className="flex items-center gap-2 text-sm text-gray-700">
-      <input
-        type="radio"
-        name="health"
-        value="not_good"
-        checked={form?.health === "not_good"}
-        onChange={(e) => set("health", e.target.value)}
-      />
-      समाधानकारक नाही (Not Good)
-    </label>
-  </div>
-</div>
+                  <label className="flex items-center gap-2 text-sm text-gray-700">
+                    <input
+                      type="radio"
+                      name="health"
+                      value="not_good"
+                      checked={form?.health === "not_good"}
+                      onChange={(e) => set("health", e.target.value)}
+                    />
+                    समाधानकारक नाही (Not Good)
+                  </label>
+                </div>
+              </div>
 
               {/* 9 */}
               <div className="border grid grid-cols-2 text-xs">
-                <div className = {questionCls}>
+                <div className={questionCls}>
                   ९. एकत्रित गुणांकन (Overall Gradation)
                 </div>
                 <input
@@ -810,7 +811,20 @@ const AppraisalForm = ({ isViewMode = false }) => {
 
 
               {/* Footer */}
-              <div className="flex justify-between pt-4 text-xs">
+
+
+              <div  className={labelCls}>
+
+                <div>
+                  <p>ठिकाण (Place) -</p>
+                  <p>दिनांक (Date) -</p>
+                </div>
+
+                <div className="text-right">
+                  <p className={footerTextCls}>प्रतिवेदन अधिकाऱ्याची सही, नाव व पदनाम</p>
+                  <p className={footerTextCls}>Signature, Name & Designation of Reporting Officer</p>               </div>
+              </div>
+              {/* <div className="flex justify-between pt-4 text-xs">
                 <div>
                   <p>ठिकाण (Place)</p>
                   <p>दिनांक (Date)</p>
@@ -820,7 +834,7 @@ const AppraisalForm = ({ isViewMode = false }) => {
                   <p className={footerTextCls}>प्रतिवेदन अधिकाऱ्याची सही, नाव व पदनाम</p>
                   <p className={footerTextCls}>Signature, Name & Designation of Reporting Officer</p>
                 </div>
-              </div>
+              </div> */}
 
 
 
@@ -833,14 +847,14 @@ const AppraisalForm = ({ isViewMode = false }) => {
                   onClick={() => setActiveSection('self')}
                   className="px-5 py-2.5 border border-gray-300 text-gray-600 text-sm rounded-xl"
                 >
-                  ← मागे
+                  ← मागील पान
                 </button>
 
                 <button
                   onClick={() => setActiveSection('reviewing')}
                   className="px-6 py-2.5 bg-blue-600 text-white text-sm rounded-xl"
                 >
-                  पुढे →
+                  जतन करा आणि पुढे जा →
                 </button>
               </div>
             </div>
@@ -850,15 +864,15 @@ const AppraisalForm = ({ isViewMode = false }) => {
             <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-6 text-xs">
 
               {/* Header */}
-         <SectionHeader
-  icon={Award}
-  title="भाग – ४ (Section 4)"
-  subtitle="पुनर्विलोकन (Review)"
-  note="Remarks of Reviewing Officer"
-/>
+              <SectionHeader
+                icon={Award}
+                title="भाग – ४ (Section 4)"
+                subtitle="पुनर्विलोकन (Review)"
+                note="Remarks of Reviewing Officer"
+              />
               {/* 1 */}
               <div>
-                <label className="block font-semibold mb-2">
+                <label  className={labelCls}>
                   १. आपण प्रतिवेदन अधिकाऱ्याने, संबंधित अधिकारी/कर्मचारी यांच्या कार्यपूर्ती, कार्यक्षमता, वैयक्तिक गुणविशेष यासंदर्भात भाग ३ मध्ये मांडलेल्या मुद्द्यांवर सहमत आहात काय?
                   (Do you agree with assessment of Reporting Officer on work done, efficiency, personal attributes in part 3 of concerned officer/employee?)
                 </label>
@@ -882,7 +896,7 @@ const AppraisalForm = ({ isViewMode = false }) => {
 
               {/* 2 */}
               <div>
-                <label className="block font-semibold mb-2">
+                <label  className={labelCls}>
                   २. सहमत नसल्यास, फरकाचे व कारणे यांचे तपशील द्यावेत
                   (In case of difference of opinion details and reasons for the same may be given)
                 </label>
@@ -897,7 +911,7 @@ const AppraisalForm = ({ isViewMode = false }) => {
 
               {/* 3 */}
               <div>
-                <label className="block font-semibold mb-2">
+                <label  className={labelCls}>
                   ३. अधिकारी/कर्मचारी यांचे एकंदर मूल्यमापन (जास्तीत जास्त १०० शब्द)
                   (Overall Assessment of officer/employee (Maximum 100 words))
                   यामध्ये संबंधित अधिकारीच्या बलस्थान, कमजोरी, त्यांनी केलेली कामगिरी, महिला व मागासवर्गीयांबाबतचा दृष्टिकोन यांचा समावेश असावा.
@@ -914,7 +928,7 @@ const AppraisalForm = ({ isViewMode = false }) => {
 
               {/* 4 */}
               <div>
-                <label className="block font-semibold mb-2">
+                <label  className={labelCls}>
                   ४. एकत्रित गुणांकन (Overall Gradation) -
                   १ ते १० या मापन गुणांकन द्यावे.
                 </label>
@@ -927,12 +941,13 @@ const AppraisalForm = ({ isViewMode = false }) => {
               </div>
 
               {/* Footer */}
+              
               <div className="grid grid-cols-2 gap-4 pt-4">
 
-               <div className="text-sm text-gray-700 space-y-1">
-      <p>ठिकाण (Place) -</p>
-      <p>दिनांक (Date) -</p>
-    </div>
+                <div  className={labelCls}>
+                  <p>ठिकाण (Place) -</p>
+                  <p>दिनांक (Date) -</p>
+                </div>
 
 
                 <div className="text-right">
@@ -963,14 +978,14 @@ const AppraisalForm = ({ isViewMode = false }) => {
                     onClick={() => setActiveSection('reporting')}
                     className="px-5 py-2.5 border border-gray-300 text-gray-600 text-sm rounded-xl"
                   >
-                    ← मागे
+                    ← मागील पान
                   </button>
 
                   <button
                     onClick={() => handleSubmit('Completed')}
                     className="px-6 py-2.5 bg-blue-600 text-white text-sm rounded-xl"
                   >
-                    Submit करा
+                    माहिती जतन करा
                   </button>
                 </div>
               )}
