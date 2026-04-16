@@ -1,9 +1,11 @@
 @import "tailwindcss";
 
+/* ===================== */
+/* 🔷 BASE STYLES */
+/* ===================== */
 @layer base {
   html,
   body {
-     /* @apply h-full overflow-hidden; */
     @apply h-full;
   }
 
@@ -12,19 +14,127 @@
   }
 
   #root {
-        /* @apply h-full; */
     @apply h-full overflow-y-auto;
   }
 }
 
+/* ===================== */
+/* 🔷 COMPONENT STYLES */
+/* ===================== */
+@layer components {
+
+  /* 🔹 Input Field */
+  .input {
+    @apply w-full border border-gray-300 p-2 rounded-lg outline-none
+    focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition;
+  }
+
+  /* 🔹 Select Field */
+  .select {
+    @apply w-full border border-gray-300 p-2 rounded-lg outline-none bg-white
+    focus:border-blue-500 focus:ring-1 focus:ring-blue-500;
+  }
+
+  /* 🔹 Date Field */
+  .date {
+    @apply w-full border border-gray-300 p-2 rounded-lg outline-none
+    focus:border-blue-500 focus:ring-1 focus:ring-blue-500;
+  }
+
+  /* 🔹 Card */
+  .card {
+    @apply bg-white p-6 rounded-2xl shadow border;
+  }
+
+  /* 🔹 Section Title */
+  .section-title {
+    @apply text-lg font-semibold mb-4 text-gray-700;
+  }
+
+  /* 🔹 Table */
+  .table {
+    @apply w-full border border-gray-200 rounded-lg overflow-hidden;
+  }
+
+  .table th {
+    @apply bg-gray-100 text-left p-2 border;
+  }
+
+  .table td {
+    @apply p-2 border;
+  }
+}
+
+/* ===================== */
+/* 🔷 BUTTON STYLES */
+/* ===================== */
+@layer components {
+
+  .btn-primary {
+    @apply bg-blue-600 text-white px-4 py-2 rounded-lg
+    hover:bg-blue-700 transition;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-700 px-4 py-2 rounded-lg
+    hover:bg-gray-300 transition;
+  }
+
+  .btn-success {
+    @apply bg-green-500 text-white px-4 py-2 rounded-lg
+    hover:bg-green-600 transition;
+  }
+
+  .btn-danger {
+    @apply bg-red-500 text-white px-4 py-2 rounded-lg
+    hover:bg-red-600 transition;
+  }
+}
+
+/* ===================== */
+/* 🔷 TAB STYLES */
+/* ===================== */
+@layer components {
+
+  /* 🔹 Main Tabs */
+  .main-tab {
+    @apply px-5 py-2 text-sm font-medium rounded-t-lg transition whitespace-nowrap;
+  }
+
+  .main-tab-active {
+    @apply bg-blue-600 text-white shadow;
+  }
+
+  .main-tab-inactive {
+    @apply text-gray-600 hover:bg-gray-200;
+  }
+
+  /* 🔹 Sub Tabs */
+  .sub-tab {
+    @apply px-4 py-1.5 text-sm rounded-full transition;
+  }
+
+  .sub-tab-active {
+    @apply bg-blue-500 text-white;
+  }
+
+  .sub-tab-inactive {
+    @apply bg-gray-200 text-gray-700 hover:bg-gray-300;
+  }
+}
+
+/* ===================== */
+/* 🔷 UTILITIES */
+/* ===================== */
 @layer utilities {
-  /* Hide scrollbar for sidebar navigation */
+
+  /* Hide scrollbar */
   .scrollbar-hide {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
   .scrollbar-hide::-webkit-scrollbar {
-    display: none; /* Chrome, Safari and Opera */
+    display: none;
   }
 }

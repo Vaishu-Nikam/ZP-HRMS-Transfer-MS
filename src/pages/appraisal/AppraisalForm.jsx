@@ -1,19 +1,18 @@
 // src/pages/appraisal/AppraisalForm.jsx
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, ClipboardCheck, Star, User, Award } from 'lucide-react';
-import toast from 'react-hot-toast';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, ClipboardCheck, Star, User, Award } from "lucide-react";
+import toast from "react-hot-toast";
 
 const CURRENT_YEAR = new Date().getFullYear();
-const YEARS = Array.from({ length: 5 }, (_, i) => CURRENT_YEAR - i);
 
 const GRADE_FROM_SCORE = (score) => {
-  if (!score) return 'Pending';
-  if (score >= 90) return 'Outstanding';
-  if (score >= 75) return 'Very Good';
-  if (score >= 60) return 'Good';
-  if (score >= 45) return 'Average';
-  return 'Poor';
+  if (!score) return "Pending";
+  if (score >= 90) return "Outstanding";
+  if (score >= 75) return "Very Good";
+  if (score >= 60) return "Good";
+  if (score >= 45) return "Average";
+  return "Poor";
 };
 
 const headingCls = "text-base font-semibold text-gray-900"; // darker = better hierarchy
@@ -96,7 +95,8 @@ const inputCls = `w-full px-4 py-3 border border-gray-300 rounded-xl text-sm foc
 
 const ScoreInput = ({ label, max, value, onChange, disabled }) => {
   const pct = value ? Math.round((Number(value) / max) * 100) : 0;
-  const barColor = pct >= 75 ? 'bg-green-500' : pct >= 50 ? 'bg-blue-500' : 'bg-orange-400';
+  const barColor =
+    pct >= 75 ? "bg-green-500" : pct >= 50 ? "bg-blue-500" : "bg-orange-400";
 
   return (
     <div className="space-y-2">
@@ -106,19 +106,27 @@ const ScoreInput = ({ label, max, value, onChange, disabled }) => {
       </div>
       <div className="flex items-center gap-4">
         <input
-          type="number" min="0" max={max}
+          type="number"
+          min="0"
+          max={max}
           className={`w-20 px-3 py-2 border border-gray-300 rounded-lg text-sm text-center font-semibold
             focus:outline-none focus:ring-2 focus:ring-blue-500
-            ${disabled ? 'bg-gray-50 cursor-not-allowed' : 'bg-white'}`}
-          value={value || ''}
-          onChange={e => onChange(Math.min(max, Math.max(0, Number(e.target.value))))}
+            ${disabled ? "bg-gray-50 cursor-not-allowed" : "bg-white"}`}
+          value={value || ""}
+          onChange={(e) =>
+            onChange(Math.min(max, Math.max(0, Number(e.target.value))))
+          }
           disabled={disabled}
         />
         <div className="flex-1 bg-gray-100 rounded-full h-2.5 overflow-hidden">
-          <div className={`h-2.5 rounded-full transition-all duration-300 ${barColor}`}
-            style={{ width: `${pct}%` }} />
+          <div
+            className={`h-2.5 rounded-full transition-all duration-300 ${barColor}`}
+            style={{ width: `${pct}%` }}
+          />
         </div>
-        <span className="text-sm font-semibold text-gray-600 w-10 text-right">{pct}%</span>
+        <span className="text-sm font-semibold text-gray-600 w-10 text-right">
+          {pct}%
+        </span>
       </div>
     </div>
   );
@@ -129,20 +137,69 @@ const AppraisalForm = ({ isViewMode = false }) => {
   const { id } = useParams();
   const isEdit = !!id;
 
-  const [activeSection, setActiveSection] = useState('info');
+  const [activeSection, setActiveSection] = useState("info");
   const [employees, setEmployees] = useState([]);
   const [form, setForm] = useState({
-    employee_id: '', appraisal_year: CURRENT_YEAR,
-    target_achievement: '', work_quality: '', punctuality: '',
-    initiative: '', team_work: '', communication: '',
-    self_remarks: '',
-    reporting_officer: '', reporting_score: '', reporting_remarks: '',
-    reviewing_officer: '', reviewing_score: '', reviewing_remarks: '',
-    final_grade: '', status: 'Draft',
-  });
+    // 🔹 Section 1 – Establishment
+    employee_name: "",
+    cadre: "",
+    dob: "",
+    designation: "",
+    department: "",
 
+    reporting_officer_details: "",
+    reviewing_officer_details: "",
+
+    leave_details: "",
+    training_details: "",
+    assets_statement: "",
+
+    // 🔹 Section 2 – Self Appraisal
+    job_description: "",
+    allocated_tasks: "",
+    key_works: "",
+    difficulties: "",
+    training_required: "",
+    self_assets_statement: "",
+
+    // 🔹 Score Based (existing)
+    target_achievement: "",
+    work_quality: "",
+    punctuality: "",
+    initiative: "",
+    team_work: "",
+    communication: "",
+    self_remarks: "",
+
+    // 🔹 Section 3 – Reporting Officer
+    work_completion_1: "",
+    work_completion_2: "",
+    work_completion_3: "",
+
+    personal_attr_1: "",
+    personal_attr_2: "",
+    personal_attr_3: "",
+    personal_attr_4: "",
+    personal_attr_5: "",
+    personal_attr_6: "",
+
+    efficiency_1: "",
+    efficiency_2: "",
+    efficiency_3: "",
+    efficiency_4: "",
+    efficiency_5: "",
+
+    character_integrity: "",
+    overall_assessment: "",
+    state_of_health: "",
+    overall_gradation: "",
+
+    agree_with_reporting: "", // Yes / No
+    review_overall_assessment: "",
+    review_overall_gradation: "",
+  });
   useEffect(() => {
-    setEmployees(JSON.parse(localStorage.getItem('employees')) || []);
+    setEmployees(JSON.parse(localStorage.getItem("employees")) || []);
     if (isEdit) {
       const data = JSON.parse(localStorage.getItem('appraisals')) || [];
       const found = data.find(a => String(a.appraisal_id) === String(id));
@@ -150,7 +207,7 @@ const AppraisalForm = ({ isViewMode = false }) => {
     }
   }, [id]);
 
-  const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+  const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
 
   const selfTotal = SELF_FIELDS.reduce((s, f) => s + (Number(form[f.key]) || 0), 0);
   const avgScore = form.reporting_score
@@ -159,13 +216,19 @@ const AppraisalForm = ({ isViewMode = false }) => {
   const autoGrade = GRADE_FROM_SCORE(avgScore);
   const gradeStyle = GRADE_STYLE[autoGrade] || GRADE_STYLE['Pending'];
 
-  const selectedEmp = employees.find(e => String(e.employee_id) === String(form.employee_id));
+  const selectedEmp = employees.find(
+    (e) => String(e.employee_id) === String(form.employee_id),
+  );
   const empInitials = selectedEmp
-    ? `${(selectedEmp.first_name || '')[0] || ''}${(selectedEmp.last_name || '')[0] || ''}`
-    : '?';
+    ? `${(selectedEmp.first_name || "")[0] || ""}${(selectedEmp.last_name || "")[0] || ""}`
+    : "?";
 
   const handleSubmit = (status) => {
-    if (!form.employee_id) { toast.error('कर्मचारी निवडा'); setActiveSection('info'); return; }
+    if (!form.employee_id) {
+      toast.error("कर्मचारी निवडा");
+      setActiveSection("info");
+      return;
+    }
 
     const finalForm = {
       ...form,
@@ -181,18 +244,20 @@ const AppraisalForm = ({ isViewMode = false }) => {
       ? existing.map(a => String(a.appraisal_id) === String(id) ? finalForm : a)
       : [...existing, finalForm];
 
-    localStorage.setItem('appraisals', JSON.stringify(updated));
-    toast.success(isEdit ? 'APR अपडेट झाला! ✅' : 'APR तयार झाला! ✅');
-    navigate('/appraisal');
+    localStorage.setItem("appraisals", JSON.stringify(updated));
+    toast.success(isEdit ? "APR अपडेट झाला! ✅" : "APR तयार झाला! ✅");
+    navigate("/appraisal");
   };
 
   const NavBtn = ({ item }) => (
     <button
       onClick={() => setActiveSection(item.id)}
       className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-medium transition-all text-left
-        ${activeSection === item.id
-          ? 'bg-slate-600 text-white'
-          : 'text-slate-400 hover:bg-slate-700 hover:text-slate-200'}`}
+        ${
+          activeSection === item.id
+            ? "bg-slate-600 text-white"
+            : "text-slate-400 hover:bg-slate-700 hover:text-slate-200"
+        }`}
     >
       <item.icon className="w-4 h-4 shrink-0" />
       {item.label}
@@ -201,16 +266,17 @@ const AppraisalForm = ({ isViewMode = false }) => {
 
   return (
     <div className="space-y-5">
-
       {/* ── Header ── */}
       <div className="flex items-center gap-3">
-        <button onClick={() => navigate('/appraisal')}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-all">
+        <button
+          onClick={() => navigate("/appraisal")}
+          className="p-2 hover:bg-gray-100 rounded-lg transition-all"
+        >
           <ArrowLeft className="w-5 h-5 text-gray-600" />
         </button>
         <div>
           <h1 className="text-xl font-bold text-gray-900">
-            {isViewMode ? 'APR अहवाल' : isEdit ? 'APR संपादन' : 'नवीन APR'}
+            {isViewMode ? "APR अहवाल" : isEdit ? "APR संपादन" : "नवीन APR"}
           </h1>
           <p className="text-sm text-gray-500">वार्षिक कार्यमूल्यमापन अहवाल</p>
         </div>
