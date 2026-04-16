@@ -6,9 +6,9 @@ import useEmployeeTabs from "../../hooks/employee/useEmployeeTabs";
 import EmployeeMainTabs from "./components/tabs/EmployeeMainTabs";
 import EmployeeSubTabs from "./components/tabs/EmployeeSubTabs";
 
-import BasicDetailsForm from "./components/forms/personal/BasicDetailsForm";
-import AppointmentDetailsForm from "./components/forms/personal/AppointmentDetailsForm";
-import PersonalDetailsForm from "./components/forms/personal/PersonalDetailsForm";
+import PersonalPart1Form from "./components/forms/personal/PersonalPart1Form";
+import PersonalPart2Form from "./components/forms/personal/PersonalPart2Form";
+import PersonalPart3Form from "./components/forms/personal/PersonalPart3Form";
 import PersonalPart4Form from "./components/forms/personal/PersonalPart4Form";
 import PersonalPart5Form from "./components/forms/personal/PersonalPart5Form";
 import PersonalPart6Form from "./components/forms/personal/PersonalPart6Form";
@@ -95,7 +95,7 @@ const EmployeeAdd = () => {
         onChange={setActiveSubTab}
       />
       {activeMainTab === "personal" && activeSubTab === "भाग 1" && (
-        <BasicDetailsForm
+        <PersonalPart1Form
           onNext={handleNext}
           onPrev={handlePrev}
           onCancel={() => navigate("/employee")}
@@ -104,7 +104,7 @@ const EmployeeAdd = () => {
         />
       )}
       {activeMainTab === "personal" && activeSubTab === "भाग 2" && (
-        <AppointmentDetailsForm
+        <PersonalPart2Form
           onNext={handleNext}
           onPrev={handlePrev}
           onCancel={() => navigate("/employee")}
@@ -113,7 +113,7 @@ const EmployeeAdd = () => {
         />
       )}
       {activeMainTab === "personal" && activeSubTab === "भाग 3" && (
-        <PersonalDetailsForm
+        <PersonalPart3Form
           onNext={handleNext}
           onPrev={handlePrev}
           onCancel={() => navigate("/employee")}

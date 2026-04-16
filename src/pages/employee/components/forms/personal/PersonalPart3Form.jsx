@@ -4,7 +4,7 @@ import { Input } from "../../../../../components/common/Input";
 import DatePicker from "../../../../../components/common/DatePicker";
 
 
-const PersonalDetailsForm = ({
+const PersonalPart3Form = ({
   onNext,
   onPrev,
   onCancel,
@@ -110,4 +110,4 @@ const PersonalDetailsForm = ({
   );
 };
 
-export default PersonalDetailsForm;
+export default PersonalPart3Form;
