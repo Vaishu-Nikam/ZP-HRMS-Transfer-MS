@@ -4,14 +4,19 @@ import { DataTable } from "../../components/ui/DataTable";
 import { PageHeader } from "../../components/common/PageHeader";
 import { TableActions } from "../../components/common/TableActions";
 import toast from "react-hot-toast";
+import EmployeeRegisterForm from "./components/forms/EmployeeRegisterForm";
+import SendEmailModal from "./components/modals/SendEmailModal";
 
 const EmployeeList = () => {
   const navigate = useNavigate();
 
   const [employees, setEmployees] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showRegister, setShowRegister] = useState(false);
 
-  
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+
   useEffect(() => {
     const data = JSON.parse(localStorage.getItem("employees")) || [];
     setEmployees(data);
@@ -20,16 +25,16 @@ const EmployeeList = () => {
   // 🔍 SEARCH
   const filteredData = useMemo(() => {
     return employees.filter((emp) =>
-      (emp.name || "")
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase())
+      (emp.first_name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (emp.phone || "").toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [employees, searchQuery]);
 
   // ❌ DELETE
   const handleDelete = (items) => {
-    const ids = items.map((item) => item.id);
+    if (!window.confirm("Delete employee?")) return;
 
+    const ids = items.map((item) => item.id);
     const updated = employees.filter((emp) => !ids.includes(emp.id));
 
     setEmployees(updated);
@@ -38,24 +43,91 @@ const EmployeeList = () => {
     toast.success("Deleted successfully");
   };
 
-  // 📊 COLUMNS
   const columns = useMemo(
     () => [
-      { key: "name", header: "नाव" },
-      { key: "mobile", header: "मोबाईल" },
-      { key: "designation", header: "पद" },
-
       {
-        key: "actions",
-        header: "Actions",
-        render: (_value, row, helpers) => (
-          <TableActions
-            onView={() => navigate(`view/${row.id}`)}   // ✅ FIXED
-            onEdit={() => navigate(`edit/${row.id}`)}   // ✅ FIXED
-            onDelete={() => helpers?.onDelete?.()}
-          />
+        key: "name",
+        header: "नाव",
+        render: (_, row) => (
+          <span className="font-medium text-gray-800">
+            {row.first_name || "-"} {row.last_name || ""}
+          </span>
         ),
       },
+
+      {
+        key: "phone",
+        header: "मोबाईल",
+        render: (_, row) => (
+          <span className="text-gray-700">
+            {row.phone || <span className="text-gray-400 italic">N/A</span>}
+          </span>
+        ),
+      },
+
+      {
+        key: "designation",
+        header: "पद",
+        render: (_, row) => (
+          <span className="text-gray-700">
+            {row.designation || <span className="text-gray-400 italic">N/A</span>}
+          </span>
+        ),
+      },
+
+      // STATUS
+      {
+        key: "formCompleted",
+        header: "STATUS",
+        render: (_, row) => (
+          <span
+            className={`px-3 py-1 text-xs rounded-full font-medium ${
+              row.formCompleted
+                ? "bg-green-100 text-green-700"
+                : "bg-yellow-100 text-yellow-700"
+            }`}
+          >
+            {row.formCompleted ? "Completed" : "Pending"}
+          </span>
+        ),
+      },
+
+     {
+  key: "actions",
+  header: "ACTIONS",
+  render: (_value, row, helpers) => (
+    <div className="flex items-center gap-2">
+
+      <TableActions
+        onView={() => {
+          localStorage.setItem("selectedEmployeeId", row.id);
+          navigate("view");
+        }}
+        onDelete={() => helpers?.onDelete?.()}
+      />
+
+      {!row.formCompleted && (
+        <button
+          onClick={() => navigate(`/employee-form/${row.id}`)}
+          className="px-3 py-1 text-xs rounded-full border border-blue-200 text-blue-600 bg-blue-50 hover:bg-blue-100 transition"
+        >
+          Complete
+        </button>
+      )}
+
+      <button
+        onClick={() => {
+          setSelectedEmployee(row);
+          setShowEmailModal(true);
+        }}
+        className="px-3 py-1 text-xs rounded-full border border-purple-200 text-purple-600 bg-purple-50 hover:bg-purple-100 transition"
+      >
+        Email
+      </button>
+
+    </div>
+  ),
+}
     ],
     [navigate]
   );
@@ -63,23 +135,55 @@ const EmployeeList = () => {
   return (
     <div className="space-y-6">
 
-      {/* 🔷 Header */}
       <PageHeader
         title="कर्मचारी यादी"
         description="कर्मचारी व्यवस्थापन"
         actionLabel="नवीन कर्मचारी जोडा"
-        onAction={() => navigate("add")}   // ✅ FIXED
+        onAction={() => setShowRegister(true)}
       />
 
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
 
-      <DataTable
-        columns={columns}
-        data={filteredData}
-        onSearch={setSearchQuery}
-        onDelete={handleDelete}
-        rowKey="id"
-        showRowNumbers={true}
-      />
+        <DataTable
+          columns={columns}
+          data={filteredData}
+          onSearch={setSearchQuery}
+          onDelete={handleDelete}
+          rowKey="id"
+          showRowNumbers={true}
+        />
+
+      </div>
+
+      {showRegister && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+
+          <div className="bg-white p-6 rounded-xl w-[600px] shadow-lg animate-fadeIn">
+
+            <h2 className="text-lg font-bold mb-4">
+              कर्मचारी नोंदणी
+            </h2>
+
+            <EmployeeRegisterForm
+              onClose={() => setShowRegister(false)}
+              onSuccess={() => {
+                setShowRegister(false);
+                const data = JSON.parse(localStorage.getItem("employees")) || [];
+                setEmployees(data);
+              }}
+            />
+
+          </div>
+        </div>
+      )}
+
+      {showEmailModal && (
+        <SendEmailModal
+          employee={selectedEmployee}
+          onClose={() => setShowEmailModal(false)}
+        />
+      )}
+
     </div>
   );
 };

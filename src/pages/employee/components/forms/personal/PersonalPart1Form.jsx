@@ -3,7 +3,7 @@ import EmployeeFormCard from "../../../../../components/employee/layout/Employee
 import DatePicker from "../../../../../components/common/DatePicker";
 import { Input } from "../../../../../components/common/Input";
 
-const BasicDetailsForm = ({
+const PersonalPart1Form = ({
   onNext,
   onPrev,
   onCancel,
@@ -208,4 +208,4 @@ const BasicDetailsForm = ({
   );
 };
 
-export default BasicDetailsForm;
+export default PersonalPart1Form;
