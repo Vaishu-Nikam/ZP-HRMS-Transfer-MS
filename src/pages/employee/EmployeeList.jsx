@@ -92,42 +92,43 @@ const EmployeeList = () => {
         ),
       },
 
-     {
-  key: "actions",
-  header: "ACTIONS",
-  render: (_value, row, helpers) => (
-    <div className="flex items-center gap-2">
+      // ACTIONS
+      {
+        key: "actions",
+        header: "ACTIONS",
+        render: (_value, row, helpers) => (
+          <div className="flex items-center gap-2">
 
-      <TableActions
-        onView={() => {
-          localStorage.setItem("selectedEmployeeId", row.id);
-          navigate("view");
-        }}
-        onDelete={() => helpers?.onDelete?.()}
-      />
+            {/* ICON ACTIONS */}
+            <TableActions
+              onView={() => navigate(`view/${row.id}`)}
+              onDelete={() => helpers?.onDelete?.()}
+            />
 
-      {!row.formCompleted && (
-        <button
-          onClick={() => navigate(`/employee-form/${row.id}`)}
-          className="px-3 py-1 text-xs rounded-full border border-blue-200 text-blue-600 bg-blue-50 hover:bg-blue-100 transition"
-        >
-          Complete
-        </button>
-      )}
+            {/* COMPLETE FORM */}
+            {!row.formCompleted && (
+              <button
+                onClick={() => navigate(`edit/${row.id}`)}
+                className="px-3 py-1 text-xs rounded-full border border-blue-200 text-blue-600 bg-blue-50 hover:bg-blue-100 transition"
+              >
+                Complete
+              </button>
+            )}
 
-      <button
-        onClick={() => {
-          setSelectedEmployee(row);
-          setShowEmailModal(true);
-        }}
-        className="px-3 py-1 text-xs rounded-full border border-purple-200 text-purple-600 bg-purple-50 hover:bg-purple-100 transition"
-      >
-        Email
-      </button>
+            {/* 👉 EMAIL */}
+            <button
+              onClick={() => {
+                setSelectedEmployee(row);
+                setShowEmailModal(true);
+              }}
+              className="px-3 py-1 text-xs rounded-full border border-purple-200 text-purple-600 bg-purple-50 hover:bg-purple-100 transition"
+            >
+              Email
+            </button>
 
-    </div>
-  ),
-}
+          </div>
+        ),
+      },
     ],
     [navigate]
   );
@@ -135,6 +136,7 @@ const EmployeeList = () => {
   return (
     <div className="space-y-6">
 
+      {/* 🔷 Header */}
       <PageHeader
         title="कर्मचारी यादी"
         description="कर्मचारी व्यवस्थापन"
@@ -142,6 +144,7 @@ const EmployeeList = () => {
         onAction={() => setShowRegister(true)}
       />
 
+      {/* 🔷 Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
 
         <DataTable
@@ -155,6 +158,7 @@ const EmployeeList = () => {
 
       </div>
 
+      {/* 🔥 REGISTER MODAL */}
       {showRegister && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
 
@@ -177,6 +181,7 @@ const EmployeeList = () => {
         </div>
       )}
 
+      {/* 🔥 EMAIL MODAL */}
       {showEmailModal && (
         <SendEmailModal
           employee={selectedEmployee}

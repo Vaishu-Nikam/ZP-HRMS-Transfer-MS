@@ -46,7 +46,6 @@ const ServiceProgressForm = (props) => {
   return (
     <EmployeeFormCard title="कर्मचारी सेवाबाबत माहिती" {...props}>
       <div className="space-y-6">
-
         {/* 🔷 FIRST BENEFIT */}
         <div className="grid grid-cols-2 gap-4">
           <h3 className="col-span-2 font-semibold">पहिला लाभ (10/12 वर्षे)</h3>
@@ -55,7 +54,7 @@ const ServiceProgressForm = (props) => {
             <label className="text-sm font-medium">लाभ मिळाला का?</label>
             <DropdownSearch
               value={formData.firstBenefit}
-              onChange={(e)=>handleChange("firstBenefit", e.target.value)}
+              onChange={(e) => handleChange("firstBenefit", e.target.value)}
               options={yesNoOptions}
               placeholder="निवडा"
             />
@@ -63,20 +62,30 @@ const ServiceProgressForm = (props) => {
 
           {formData.firstBenefit === "होय" && (
             <>
-              <DatePicker label="पूर्ण दिनांक"
-                onChange={(v)=>handleChange("firstCompleteDate", v)} />
+              <DatePicker
+                label="पूर्ण दिनांक"
+                onChange={(v) => handleChange("firstCompleteDate", v)}
+              />
 
-              <DatePicker label="मिळाल्याचा दिनांक"
-                onChange={(v)=>handleChange("firstGivenDate", v)} />
+              <DatePicker
+                label="मिळाल्याचा दिनांक"
+                onChange={(v) => handleChange("firstGivenDate", v)}
+              />
 
-              <DatePicker label="देय दिनांक"
-                onChange={(v)=>handleChange("firstDueDate", v)} />
+              <DatePicker
+                label="देय दिनांक"
+                onChange={(v) => handleChange("firstDueDate", v)}
+              />
 
-              <DatePicker label="आदेश दिनांक"
-                onChange={(v)=>handleChange("firstOrderDate", v)} />
+              <DatePicker
+                label="आदेश दिनांक"
+                onChange={(v) => handleChange("firstOrderDate", v)}
+              />
 
-              <Input label="आदेश क्रमांक"
-                onChange={(e)=>handleChange("firstOrderNo", e.target.value)} />
+              <Input
+                label="आदेश क्रमांक"
+                onChange={(e) => handleChange("firstOrderNo", e.target.value)}
+              />
             </>
           )}
         </div>
@@ -89,7 +98,7 @@ const ServiceProgressForm = (props) => {
             <label className="text-sm font-medium">लाभ मिळाला का?</label>
             <DropdownSearch
               value={formData.secondBenefit}
-              onChange={(e)=>handleChange("secondBenefit", e.target.value)}
+              onChange={(e) => handleChange("secondBenefit", e.target.value)}
               options={yesNoOptions}
               placeholder="निवडा"
             />
@@ -97,20 +106,30 @@ const ServiceProgressForm = (props) => {
 
           {formData.secondBenefit === "होय" && (
             <>
-              <DatePicker label="पूर्ण दिनांक"
-                onChange={(v)=>handleChange("secondCompleteDate", v)} />
+              <DatePicker
+                label="पूर्ण दिनांक"
+                onChange={(v) => handleChange("secondCompleteDate", v)}
+              />
 
-              <DatePicker label="मिळाल्याचा दिनांक"
-                onChange={(v)=>handleChange("secondGivenDate", v)} />
+              <DatePicker
+                label="मिळाल्याचा दिनांक"
+                onChange={(v) => handleChange("secondGivenDate", v)}
+              />
 
-              <DatePicker label="देय दिनांक"
-                onChange={(v)=>handleChange("secondDueDate", v)} />
+              <DatePicker
+                label="देय दिनांक"
+                onChange={(v) => handleChange("secondDueDate", v)}
+              />
 
-              <DatePicker label="आदेश दिनांक"
-                onChange={(v)=>handleChange("secondOrderDate", v)} />
+              <DatePicker
+                label="आदेश दिनांक"
+                onChange={(v) => handleChange("secondOrderDate", v)}
+              />
 
-              <Input label="आदेश क्रमांक"
-                onChange={(e)=>handleChange("secondOrderNo", e.target.value)} />
+              <Input
+                label="आदेश क्रमांक"
+                onChange={(e) => handleChange("secondOrderNo", e.target.value)}
+              />
             </>
           )}
         </div>
@@ -123,7 +142,7 @@ const ServiceProgressForm = (props) => {
             <label className="text-sm font-medium">लाभ मिळाला का?</label>
             <DropdownSearch
               value={formData.thirdBenefit}
-              onChange={(e)=>handleChange("thirdBenefit", e.target.value)}
+              onChange={(e) => handleChange("thirdBenefit", e.target.value)}
               options={yesNoOptions}
               placeholder="निवडा"
             />
@@ -131,20 +150,30 @@ const ServiceProgressForm = (props) => {
 
           {formData.thirdBenefit === "होय" && (
             <>
-              <DatePicker label="पूर्ण दिनांक"
-                onChange={(v)=>handleChange("thirdCompleteDate", v)} />
+              <DatePicker
+                label="पूर्ण दिनांक"
+                onChange={(v) => handleChange("thirdCompleteDate", v)}
+              />
 
-              <DatePicker label="मिळाल्याचा दिनांक"
-                onChange={(v)=>handleChange("thirdGivenDate", v)} />
+              <DatePicker
+                label="मिळाल्याचा दिनांक"
+                onChange={(v) => handleChange("thirdGivenDate", v)}
+              />
 
-              <DatePicker label="देय दिनांक"
-                onChange={(v)=>handleChange("thirdDueDate", v)} />
+              <DatePicker
+                label="देय दिनांक"
+                onChange={(v) => handleChange("thirdDueDate", v)}
+              />
 
-              <DatePicker label="आदेश दिनांक"
-                onChange={(v)=>handleChange("thirdOrderDate", v)} />
+              <DatePicker
+                label="आदेश दिनांक"
+                onChange={(v) => handleChange("thirdOrderDate", v)}
+              />
 
-              <Input label="आदेश क्रमांक"
-                onChange={(e)=>handleChange("thirdOrderNo", e.target.value)} />
+              <Input
+                label="आदेश क्रमांक"
+                onChange={(e) => handleChange("thirdOrderNo", e.target.value)}
+              />
             </>
           )}
         </div>
@@ -157,15 +186,17 @@ const ServiceProgressForm = (props) => {
             <label className="text-sm font-medium">मंजूर आहे का?</label>
             <DropdownSearch
               value={formData.chattoPay}
-              onChange={(e)=>handleChange("chattoPay", e.target.value)}
+              onChange={(e) => handleChange("chattoPay", e.target.value)}
               options={yesNoOptions}
               placeholder="निवडा"
             />
           </div>
 
           {formData.chattoPay === "होय" && (
-            <Input label="आदेश क्रमांक व दिनांक"
-              onChange={(e)=>handleChange("chattoOrder", e.target.value)} />
+            <Input
+              label="आदेश क्रमांक व दिनांक"
+              onChange={(e) => handleChange("chattoOrder", e.target.value)}
+            />
           )}
         </div>
 
@@ -177,18 +208,19 @@ const ServiceProgressForm = (props) => {
             <label className="text-sm font-medium">मंजूर आहे का?</label>
             <DropdownSearch
               value={formData.selectionPay}
-              onChange={(e)=>handleChange("selectionPay", e.target.value)}
+              onChange={(e) => handleChange("selectionPay", e.target.value)}
               options={yesNoOptions}
               placeholder="निवडा"
             />
           </div>
 
           {formData.selectionPay === "होय" && (
-            <Input label="आदेश क्रमांक व दिनांक"
-              onChange={(e)=>handleChange("selectionOrder", e.target.value)} />
+            <Input
+              label="आदेश क्रमांक व दिनांक"
+              onChange={(e) => handleChange("selectionOrder", e.target.value)}
+            />
           )}
         </div>
-
       </div>
     </EmployeeFormCard>
   );
