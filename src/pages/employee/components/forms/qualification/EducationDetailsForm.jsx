@@ -1,8 +1,11 @@
 import { useState } from "react";
 import EmployeeFormCard from "../../../../../components/employee/layout/EmployeeFormCard";
 import { Input } from "../../../../../components/common/Input";
+import DropdownSearch from "../../../../../components/common/DropdownSearch";
+
 
 const EducationDetailsForm = (props) => {
+
   const [records, setRecords] = useState([
     {
       qualificationType: "",
@@ -15,18 +18,18 @@ const EducationDetailsForm = (props) => {
   ]);
 
   const qualificationTypes = [
-    "निरक्षर",
-    "पूर्व प्राथमिक",
-    "उच्च प्राथमिक",
-    "माध्यमिक",
-    "उच्च माध्यमिक",
-    "पदवीधर",
-    "पदव्युत्तर",
+    { id: "निरक्षर", name: "निरक्षर" },
+    { id: "पूर्व प्राथमिक", name: "पूर्व प्राथमिक" },
+    { id: "उच्च प्राथमिक", name: "उच्च प्राथमिक" },
+    { id: "माध्यमिक", name: "माध्यमिक" },
+    { id: "उच्च माध्यमिक", name: "उच्च माध्यमिक" },
+    { id: "पदवीधर", name: "पदवीधर" },
+    { id: "पदव्युत्तर", name: "पदव्युत्तर" },
   ];
 
   const qualificationTimeOptions = [
-    "नियुक्तीच्या वेळी",
-    "नियुक्तीनंतर",
+    { id: "नियुक्तीच्या वेळी", name: "नियुक्तीच्या वेळी" },
+    { id: "नियुक्तीनंतर", name: "नियुक्तीनंतर" },
   ];
 
   const handleChange = (i, field, value) => {
@@ -63,14 +66,15 @@ const EducationDetailsForm = (props) => {
 
   return (
     <EmployeeFormCard title="शैक्षणिक अर्हता" {...props}>
-      <div className="space-y-4">
+
+      <div className="space-y-5">
 
         {records.map((r, i) => (
-          <div key={i} className="border rounded-xl p-4 bg-slate-50">
+          <div key={i} className="bg-slate-50 rounded-xl p-4 space-y-4 shadow-sm">
 
             {/* Header */}
-            <div className="flex justify-between mb-3">
-              <h3 className="text-sm font-semibold">
+            <div className="flex justify-between items-center">
+              <h3 className="text-sm font-semibold text-slate-700">
                 रेकॉर्ड {i + 1}
               </h3>
 
@@ -85,81 +89,71 @@ const EducationDetailsForm = (props) => {
             </div>
 
             {/* Form */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-              {/* शैक्षणिक अहर्ता प्रकार */}
+              {/* प्रकार */}
               <div>
-                <label className="text-sm font-medium">
+                <label className="text-sm font-medium text-slate-700">
                   शैक्षणिक अहर्ता प्रकार
                 </label>
-                <select
-                  className="input mt-1"
+                <DropdownSearch
+                  options={qualificationTypes}
                   value={r.qualificationType}
                   onChange={(e) =>
                     handleChange(i, "qualificationType", e.target.value)
                   }
-                >
-                  <option value="">निवडा</option>
-                  {qualificationTypes.map((q, idx) => (
-                    <option key={idx}>{q}</option>
-                  ))}
-                </select>
+                  placeholder="निवडा"
+                />
               </div>
 
-              {/* संस्था */}
               <Input
                 label="संस्था / विद्यापीठ"
-                placeholder="Enter Institute"
+                placeholder="उदा. पुणे विद्यापीठ"
                 value={r.institute}
                 onChange={(e) =>
                   handleChange(i, "institute", e.target.value)
                 }
               />
 
-              {/* शैक्षणिक अहर्ता */}
               <Input
                 label="शैक्षणिक अहर्ता"
-                placeholder="Enter Qualification"
+                placeholder="उदा. B.Sc Computer Science"
                 value={r.qualification}
                 onChange={(e) =>
                   handleChange(i, "qualification", e.target.value)
                 }
               />
 
-              {/* वर्ष */}
               <Input
                 label="उत्तीर्ण झालेले वर्ष"
-                placeholder="Enter Year"
+                placeholder="उदा. 2023"
                 value={r.passingYear}
                 onChange={(e) =>
                   handleChange(i, "passingYear", e.target.value)
                 }
               />
 
-              {/* पात्रता कधी */}
+              {/* पात्रता वेळ */}
               <div>
-                <label className="text-sm font-medium">
+                <label className="text-sm font-medium text-slate-700">
                   पात्रता कधी प्राप्त केली
                 </label>
-                <select
-                  className="input mt-1"
+                <DropdownSearch
+                  options={qualificationTimeOptions}
                   value={r.qualificationTime}
                   onChange={(e) =>
                     handleChange(i, "qualificationTime", e.target.value)
                   }
-                >
-                  <option value="">निवडा</option>
-                  {qualificationTimeOptions.map((q, idx) => (
-                    <option key={idx}>{q}</option>
-                  ))}
-                </select>
+                  placeholder="निवडा"
+                />
               </div>
 
-              {/* Certificate */}
+              {/* FILE */}
               <div>
-                <label className="text-sm font-medium">
-                  प्रमाणपत्र (2MB पर्यंत)
+                <label className="text-sm font-medium text-slate-700">
+                  प्रमाणपत्र (२ MB पर्यंत)
                 </label>
+
                 <input
                   type="file"
                   className="input mt-1"
@@ -170,15 +164,17 @@ const EducationDetailsForm = (props) => {
               </div>
 
             </div>
+
           </div>
         ))}
 
-        {/* Add */}
+        {/* Add Button */}
         <button onClick={addRow} className="btn-primary">
           + रेकॉर्ड जोडा
         </button>
 
       </div>
+
     </EmployeeFormCard>
   );
 };

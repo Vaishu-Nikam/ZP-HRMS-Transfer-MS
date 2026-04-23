@@ -1,5 +1,6 @@
 import { useState } from "react";
 import EmployeeFormCard from "../../../../../components/employee/layout/EmployeeFormCard";
+import FileUpload from "../../../../../components/common/FileUpload";
 
 const PersonalPart6Form = ({
   onNext,
@@ -8,6 +9,7 @@ const PersonalPart6Form = ({
   isFirst,
   isLast,
 }) => {
+
   const [formData, setFormData] = useState({
     photo: null,
     signature: null,
@@ -19,7 +21,7 @@ const PersonalPart6Form = ({
     const allowedTypes = ["image/jpeg", "image/png"];
 
     if (!allowedTypes.includes(file.type)) {
-      alert("Only JPG / PNG files allowed");
+      alert("फक्त JPG / PNG फाईल स्वीकारली जाईल");
       return;
     }
 
@@ -38,35 +40,25 @@ const PersonalPart6Form = ({
       isFirst={isFirst}
       isLast={isLast}
     >
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        {/* फोटो */}
+        {/* 🔹 फोटो */}
         <div>
-          <label className="text-sm font-medium">
-            फोटो (.JPG / .PNG)
-          </label>
-          <input
-            type="file"
-            accept=".jpg,.jpeg,.png"
-            className="input mt-1"
-            onChange={(e) =>
-              handleFileChange("photo", e.target.files[0])
-            }
+          <FileUpload
+            label="फोटो (.JPG / .PNG)"
+            accept={["image/jpeg", "image/png"]}
+            value={formData.photo}
+            onChange={(file)=>handleFileChange("photo", file)}
           />
         </div>
 
-        {/* स्वाक्षरी */}
+        {/* 🔹 स्वाक्षरी */}
         <div>
-          <label className="text-sm font-medium">
-            स्वाक्षरी (.JPG / .PNG)
-          </label>
-          <input
-            type="file"
-            accept=".jpg,.jpeg,.png"
-            className="input mt-1"
-            onChange={(e) =>
-              handleFileChange("signature", e.target.files[0])
-            }
+          <FileUpload
+            label="स्वाक्षरी (.JPG / .PNG)"
+            accept={["image/jpeg", "image/png"]}
+            value={formData.signature}
+            onChange={(file)=>handleFileChange("signature", file)}
           />
         </div>
 

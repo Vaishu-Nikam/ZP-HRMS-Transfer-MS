@@ -1,5 +1,7 @@
 import { useState } from "react";
 import EmployeeFormCard from "../../../../../components/employee/layout/EmployeeFormCard";
+import DropdownSearch from "../../../../../components/common/DropdownSearch";
+import FileUpload from "../../../../../components/common/FileUpload";
 
 const PersonalPart5Form = ({
   onNext,
@@ -8,6 +10,7 @@ const PersonalPart5Form = ({
   isFirst,
   isLast,
 }) => {
+
   const [formData, setFormData] = useState({
     maritalStatus: "",
     marriageCert: null,
@@ -18,17 +21,20 @@ const PersonalPart5Form = ({
     gazette: null,
   });
 
-  const handleFileChange = (field, file) => {
-    if (file && file.size > 2 * 1024 * 1024) {
-      alert("File size must be less than 2MB");
-      return;
-    }
-
+  const handleChange = (field, value) => {
     setFormData((prev) => ({
       ...prev,
-      [field]: file,
+      [field]: value,
     }));
   };
+
+  const maritalOptions = [
+    { id: "विवाहित", name: "विवाहित" },
+    { id: "अविवाहित", name: "अविवाहित" },
+    { id: "विधवा", name: "विधवा" },
+    { id: "विधुर", name: "विधुर" },
+    { id: "देवदासी", name: "देवदासी" },
+  ];
 
   return (
     <EmployeeFormCard
@@ -39,112 +45,65 @@ const PersonalPart5Form = ({
       isFirst={isFirst}
       isLast={isLast}
     >
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
 
         {/* वैवाहिक स्थिती */}
         <div>
-          <label className="text-sm font-medium">
+          <label className="text-sm font-medium text-slate-700">
             वैवाहिक स्थिती
           </label>
-          <select
-            className="input mt-1"
+
+          <DropdownSearch
+            options={maritalOptions}
             value={formData.maritalStatus}
-            onChange={(e) =>
-              setFormData({ ...formData, maritalStatus: e.target.value })
+            onChange={(e)=>
+              handleChange("maritalStatus", e.target.value)
             }
-          >
-            <option value="">निवडा</option>
-            <option>विवाहित</option>
-            <option>अविवाहित</option>
-            <option>विधवा</option>
-            <option>विधुर</option>
-            <option>देवदासी</option>
-          </select>
+            placeholder="निवडा"
+          />
         </div>
 
         {/* विवाह प्रमाणपत्र */}
-        <div>
-          <label className="text-sm font-medium">
-            विवाह नोंदणी प्रमाणपत्र
-          </label>
-          <input
-            type="file"
-            className="input mt-1"
-            onChange={(e) =>
-              handleFileChange("marriageCert", e.target.files[0])
-            }
-          />
-        </div>
+        <FileUpload
+          label="विवाह नोंदणी प्रमाणपत्र (२ MB पर्यंत)"
+          value={formData.marriageCert}
+          onChange={(file)=>handleChange("marriageCert", file)}
+        />
 
         {/* जन्म दाखला */}
-        <div>
-          <label className="text-sm font-medium">
-            जन्माचा दाखला
-          </label>
-          <input
-            type="file"
-            className="input mt-1"
-            onChange={(e) =>
-              handleFileChange("birthCert", e.target.files[0])
-            }
-          />
-        </div>
+        <FileUpload
+          label="जन्माचा दाखला (२ MB पर्यंत)"
+          value={formData.birthCert}
+          onChange={(file)=>handleChange("birthCert", file)}
+        />
 
         {/* आधार */}
-        <div>
-          <label className="text-sm font-medium">
-            आधार कार्ड
-          </label>
-          <input
-            type="file"
-            className="input mt-1"
-            onChange={(e) =>
-              handleFileChange("aadhaar", e.target.files[0])
-            }
-          />
-        </div>
+        <FileUpload
+          label="आधार कार्ड (२ MB पर्यंत)"
+          value={formData.aadhaar}
+          onChange={(file)=>handleChange("aadhaar", file)}
+        />
 
         {/* पॅन */}
-        <div>
-          <label className="text-sm font-medium">
-            पॅन कार्ड
-          </label>
-          <input
-            type="file"
-            className="input mt-1"
-            onChange={(e) =>
-              handleFileChange("pan", e.target.files[0])
-            }
-          />
-        </div>
+        <FileUpload
+          label="पॅन कार्ड (२ MB पर्यंत)"
+          value={formData.pan}
+          onChange={(file)=>handleChange("pan", file)}
+        />
 
         {/* जात प्रमाणपत्र */}
-        <div>
-          <label className="text-sm font-medium">
-            जात वैधता प्रमाणपत्र
-          </label>
-          <input
-            type="file"
-            className="input mt-1"
-            onChange={(e) =>
-              handleFileChange("casteCert", e.target.files[0])
-            }
-          />
-        </div>
+        <FileUpload
+          label="जात वैधता प्रमाणपत्र (२ MB पर्यंत)"
+          value={formData.casteCert}
+          onChange={(file)=>handleChange("casteCert", file)}
+        />
 
         {/* राजपत्र */}
-        <div>
-          <label className="text-sm font-medium">
-            नावात बदल असल्यास राजपत्र
-          </label>
-          <input
-            type="file"
-            className="input mt-1"
-            onChange={(e) =>
-              handleFileChange("gazette", e.target.files[0])
-            }
-          />
-        </div>
+        <FileUpload
+          label="नावात बदल असल्यास राजपत्र (२ MB पर्यंत)"
+          value={formData.gazette}
+          onChange={(file)=>handleChange("gazette", file)}
+        />
 
       </div>
     </EmployeeFormCard>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import EmployeeFormCard from "../../../../../components/employee/layout/EmployeeFormCard";
 import DatePicker from "../../../../../components/common/DatePicker";
 import { Input } from "../../../../../components/common/Input";
+import DropdownSearch from "../../../../../components/common/DropdownSearch";
 
 const PersonalPart1Form = ({
   onNext,
@@ -10,198 +11,144 @@ const PersonalPart1Form = ({
   isFirst,
   isLast,
 }) => {
+
   const [dob, setDob] = useState("");
   const [validityDate, setValidityDate] = useState("");
 
+  const handleChange = (field, value) => {
+    console.log(field, value);
+  };
+
+  // 🔥 OPTIONS
+  const titleOptions = [
+    { id: "श्री", name: "श्री" },
+    { id: "श्रीमती", name: "श्रीमती" },
+    { id: "कु", name: "कु" },
+    { id: "डॉ", name: "डॉ" },
+  ];
+
+  const yesNoOptions = [
+    { id: "होय", name: "होय" },
+    { id: "नाही", name: "नाही" },
+  ];
+
+  const bloodGroupOptions = [
+    { id: "A+", name: "A+" },
+    { id: "B+", name: "B+" },
+    { id: "O+", name: "O+" },
+    { id: "AB+", name: "AB+" },
+  ];
+
+  const genderOptions = [
+    { id: "पुरुष", name: "पुरुष" },
+    { id: "स्त्री", name: "स्त्री" },
+  ];
+
+  const religionOptions = [
+    { id: "हिंदू", name: "हिंदू" },
+    { id: "मुस्लिम", name: "मुस्लिम" },
+  ];
+
+  const categoryOptions = [
+    { id: "SC", name: "SC" },
+    { id: "ST", name: "ST" },
+  ];
+
   return (
     <EmployeeFormCard
-      title="वैयक्तिक माहिती - भाग 1"
+      title="१. वैयक्तिक माहिती (भाग-१)"
       onNext={onNext}
       onPrev={onPrev}
       onCancel={onCancel}
       isFirst={isFirst}
       isLast={isLast}
     >
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
 
         {/* संज्ञा */}
         <div>
           <label className="text-sm font-medium">संज्ञा</label>
-          <select className="input mt-1">
-            <option>निवडा</option>
-            <option>श्री</option>
-            <option>श्रीमती</option>
-            <option>कु</option>
-            <option>डॉ</option>
-          </select>
+          <DropdownSearch
+            options={titleOptions}
+            onChange={(e)=>handleChange("title", e.target.value)}
+            placeholder="निवडा"
+          />
         </div>
 
-        {/* पहिले नाव */}
-        <Input
-          label="पहिले नाव (English)"
-          placeholder="Enter First Name"
-          required
-        />
+        <Input label="पहिले नाव (English)" placeholder="उदा. Rahul" required />
+        <Input label="वडिलांचे/पतीचे नाव" placeholder="उदा. Ram" required />
+        <Input label="आडनाव" placeholder="उदा. Patil" required />
 
-        {/* वडिलांचे नाव */}
-        <Input
-          label="वडिलांचे/पतीचे नाव"
-          placeholder="Enter Middle Name"
-          required
-        />
-
-        {/* आडनाव */}
-        <Input
-          label="आडनाव"
-          placeholder="Enter Last Name"
-          required
-        />
-
-        {/* पूर्ण नाव */}
-        <div className="col-span-2">
+        <div className="md:col-span-2">
           <Input
             label="पूर्ण नाव (मराठीमध्ये आईचे नावासह)"
             placeholder="उदा. राम शंकर पाटील"
           />
         </div>
 
-        {/* वडिलांचे नाव */}
-        <Input
-          label="वडिलांचे संपूर्ण नाव"
-          placeholder="Enter Father's Full Name"
-        />
-
-        {/* आईचे नाव */}
-        <Input
-          label="आईचे संपूर्ण नाव"
-          placeholder="Enter Mother's Name"
-        />
+        <Input label="वडिलांचे संपूर्ण नाव" placeholder="उदा. शंकर राम पाटील" />
+        <Input label="आईचे संपूर्ण नाव" placeholder="उदा. सीता शंकर पाटील" />
 
         {/* नाव बदल */}
         <div>
           <label className="text-sm font-medium">नावात बदल केला आहे का?</label>
-          <select className="input mt-1">
-            <option>नाही</option>
-            <option>होय</option>
-          </select>
+          <DropdownSearch
+            options={yesNoOptions}
+            onChange={(e)=>handleChange("nameChange", e.target.value)}
+          />
         </div>
 
-        {/* पूर्वीचे नाव */}
-        <Input
-          label="पूर्वीचे नाव"
-          placeholder="Enter Previous Name"
-        />
+        <Input label="पूर्वीचे नाव" placeholder="उदा. जुने नाव असल्यास" />
 
         {/* रक्तगट */}
         <div>
           <label className="text-sm font-medium">रक्तगट</label>
-          <select className="input mt-1">
-            <option>निवडा</option>
-            <option>A+</option>
-            <option>B+</option>
-            <option>O+</option>
-            <option>AB+</option>
-          </select>
+          <DropdownSearch options={bloodGroupOptions} />
         </div>
 
         {/* लिंग */}
         <div>
           <label className="text-sm font-medium">लिंग</label>
-          <select className="input mt-1">
-            <option>निवडा</option>
-            <option>पुरुष</option>
-            <option>स्त्री</option>
-          </select>
+          <DropdownSearch options={genderOptions} />
         </div>
 
-        {/* जन्मतारीख */}
-        <div className="relative">
-          <DatePicker
-            label="जन्मतारीख"
-            value={dob}
-            onChange={setDob}
-            placeholder="dd/MM/yyyy"
-          />
-        </div>
-
-        {/* मोबाईल */}
-        <Input
-          label="मोबाईल क्रमांक"
-          placeholder="9876543210"
-          required
+        {/* DOB */}
+        <DatePicker
+          label="जन्मतारीख (dd/MM/yyyy)"
+          value={dob}
+          onChange={setDob}
+          placeholder="दिनांक निवडा"
         />
 
-        {/* PAN */}
-        <Input
-          label="पॅन क्रमांक"
-          placeholder="ABCDE1234F"
-        />
-
-        {/* Aadhaar */}
-        <Input
-          label="आधार क्रमांक"
-          placeholder="XXXX XXXX XXXX"
-        />
-
-        {/* Email */}
-        <Input
-          label="ईमेल"
-          placeholder="example@gmail.com"
-        />
-
-        {/* Gov Email */}
-        <Input
-          label="शासकीय ईमेल"
-          placeholder="example@nic.in"
-        />
+        <Input label="मोबाईल क्रमांक" placeholder="उदा. 9876543210" required />
+        <Input label="पॅन क्रमांक" placeholder="उदा. ABCDE1234F" />
+        <Input label="आधार क्रमांक" placeholder="उदा. 1234 5678 9012" />
+        <Input label="ईमेल" placeholder="उदा. name@gmail.com" />
+        <Input label="शासकीय ईमेल" placeholder="उदा. name@nic.in" />
 
         {/* धर्म */}
         <div>
           <label className="text-sm font-medium">धर्म</label>
-          <select className="input mt-1">
-            <option>निवडा</option>
-            <option>हिंदू</option>
-            <option>मुस्लिम</option>
-          </select>
+          <DropdownSearch options={religionOptions} />
         </div>
 
         {/* प्रवर्ग */}
         <div>
           <label className="text-sm font-medium">प्रवर्ग</label>
-          <select className="input mt-1">
-            <option>निवडा</option>
-            <option>SC</option>
-            <option>ST</option>
-          </select>
+          <DropdownSearch options={categoryOptions} />
         </div>
 
-        {/* जात */}
-        <Input
-          label="जात"
-          placeholder="Enter Caste"
+        <Input label="जात" placeholder="उदा. मराठा / कुनबी" />
+        <Input label="जात वैधता क्रमांक" placeholder="उदा. MH/CASTE/12345" />
+
+        <DatePicker
+          label="जात वैधता दिनांक (dd/MM/yyyy)"
+          value={validityDate}
+          onChange={setValidityDate}
+          placeholder="दिनांक निवडा"
         />
 
-        {/* जात वैधता */}
-        <Input
-          label="जात वैधता क्रमांक"
-          placeholder="Enter Certificate Number"
-        />
-
-        {/* वैधता दिनांक */}
-        <div className="relative">
-          <DatePicker
-            label="जात वैधता दिनांक"
-            value={validityDate}
-            onChange={setValidityDate}
-            placeholder="dd/MM/yyyy"
-          />
-        </div>
-
-        {/* मातृभाषा */}
-        <Input
-          label="मातृभाषा"
-          placeholder="उदा. मराठी"
-        />
+        <Input label="मातृभाषा" placeholder="उदा. मराठी" />
 
       </div>
     </EmployeeFormCard>
