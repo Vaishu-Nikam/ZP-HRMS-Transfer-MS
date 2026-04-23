@@ -11,6 +11,8 @@ const EmployeeRegisterForm = ({ onClose, onSuccess }) => {
     role_id: "",
     first_name: "",
     last_name: "",
+    middle_name: "",
+    employee_id: "",
     zp_id: "",
     aadhaar_number: "",
     department_id: "",
@@ -34,11 +36,58 @@ const EmployeeRegisterForm = ({ onClose, onSuccess }) => {
   ];
 
   const handleSubmit = () => {
-    if (!formData.email || !formData.password) {
-      alert("Required fields fill करा");
+
+    // 🔴 Check all required fields
+    if (!formData.first_name.trim()) {
+      alert("First Name is required");
       return;
     }
 
+    if (!formData.last_name.trim()) {
+      alert("Last Name is required");
+      return;
+    }
+
+    if (!formData.employee_id.trim()) {
+      alert("Employee ID is required");
+      return;
+    }
+
+    if (!formData.phone.trim()) {
+      alert("Phone Number is required");
+      return;
+    }
+
+    if (!/^[0-9]{10}$/.test(formData.phone)) {
+      alert("Enter valid 10-digit phone number");
+      return;
+    }
+
+    if (!formData.aadhaar_number.trim()) {
+      alert("Aadhaar Number is required");
+      return;
+    }
+     if (!formData.email.trim()) {
+      alert("Email ID is required");
+      return;
+    }
+
+    if (!/^[0-9]{12}$/.test(formData.aadhaar_number)) {
+      alert("Enter valid 12-digit Aadhaar number");
+      return;
+    }
+
+    if (!formData.role_id) {
+      alert("Please select Designation");
+      return;
+    }
+
+    if (!formData.department_id) {
+      alert("Please select Department");
+      return;
+    }
+
+    // ✅ Save data
     const employees = JSON.parse(localStorage.getItem("employees")) || [];
 
     employees.push({
@@ -50,119 +99,112 @@ const EmployeeRegisterForm = ({ onClose, onSuccess }) => {
 
     localStorage.setItem("employees", JSON.stringify(employees));
 
+    alert("✅ Employee Registered Successfully");
+
     onSuccess();
   };
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-xl space-y-5 transform transition-all duration-300 scale-100 animate-fadeIn">
+    <div className="bg-white p-6 rounded-2xl shadow-xl space-y-5">
 
-      {/* 🔥 Title */}
+      {/* Title */}
       <h2 className="text-xl font-semibold text-gray-700 border-b pb-2">
         Employee Registration
       </h2>
 
-      {/* 🔥 FORM GRID */}
+      {/* Form */}
       <div className="grid grid-cols-2 gap-4">
 
-        <div className="transition-all duration-200 hover:scale-[1.02]">
-          <Input
-            label="Email Address"
-            placeholder="Enter email (e.g. abc@gmail.com)"
-            value={formData.email}
-            onChange={(e)=>handleChange("email", e.target.value)}
-          />
-        </div>
+        <Input
+          label="First Name *"
+          placeholder="Enter first name"
+          value={formData.first_name}
+          onChange={(e)=>handleChange("first_name", e.target.value)}
+        />
 
-        <div className="transition-all duration-200 hover:scale-[1.02]">
-          <Input
-            label="Phone Number"
-            placeholder="Enter mobile number"
-            value={formData.phone}
-            onChange={(e)=>handleChange("phone", e.target.value)}
-          />
-        </div>
+        <Input
+          label="Middle Name"
+          placeholder="Enter middle name"
+          value={formData.middle_name}
+          onChange={(e)=>handleChange("middle_name", e.target.value)}
+        />
 
-        <div className="transition-all duration-200 hover:scale-[1.02]">
-          <Input
-            label="Password"
-            type="password"
-            placeholder="Enter strong password"
-            value={formData.password}
-            onChange={(e)=>handleChange("password", e.target.value)}
-          />
-        </div>
+        <Input
+          label="Last Name *"
+          placeholder="Enter last name"
+          value={formData.last_name}
+          onChange={(e)=>handleChange("last_name", e.target.value)}
+        />
 
-        <div className="transition-all duration-200 hover:scale-[1.02]">
-          <label className="text-sm font-medium text-gray-600">Role</label>
+        <Input
+          label="Employee ID *"
+          placeholder="Enter Employee ID (e.g. EMP123)"
+          value={formData.employee_id}
+          onChange={(e)=>handleChange("employee_id", e.target.value)}
+        />
+
+        <Input
+          label="Email ID *"
+          placeholder="Enter email address"
+          value={formData.email}
+          onChange={(e)=>handleChange("email", e.target.value)}
+        />
+
+        <Input
+          label="Aadhaar Number *"
+          placeholder="Enter 12-digit Aadhaar"
+          value={formData.aadhaar_number}
+          onChange={(e)=>handleChange("aadhaar_number", e.target.value)}
+        />
+
+        <Input
+          label="Phone Number *"
+          placeholder="Enter mobile number"
+          value={formData.phone}
+          onChange={(e)=>handleChange("phone", e.target.value)}
+        />
+
+        {/* Designation */}
+        <div>
+          <label className="text-sm font-medium text-gray-600">
+            Select Designation *
+          </label>
           <DropdownSearch
             options={roleOptions}
             value={formData.role_id}
-            onChange={(val)=>handleChange("role_id", val)}
+            onChange={(e)=>handleChange("role_id", e.target.value)}
             placeholder="Select role"
           />
         </div>
 
-        <div className="transition-all duration-200 hover:scale-[1.02]">
-          <Input
-            label="First Name"
-            placeholder="Enter first name"
-            value={formData.first_name}
-            onChange={(e)=>handleChange("first_name", e.target.value)}
-          />
-        </div>
-
-        <div className="transition-all duration-200 hover:scale-[1.02]">
-          <Input
-            label="Last Name"
-            placeholder="Enter last name"
-            value={formData.last_name}
-            onChange={(e)=>handleChange("last_name", e.target.value)}
-          />
-        </div>
-
-        <div className="transition-all duration-200 hover:scale-[1.02]">
-          <Input
-            label="ZP ID"
-            placeholder="Enter Zilla Parishad ID"
-            value={formData.zp_id}
-            onChange={(e)=>handleChange("zp_id", e.target.value)}
-          />
-        </div>
-
-        <div className="transition-all duration-200 hover:scale-[1.02]">
-          <Input
-            label="Aadhaar Number"
-            placeholder="Enter 12-digit Aadhaar"
-            value={formData.aadhaar_number}
-            onChange={(e)=>handleChange("aadhaar_number", e.target.value)}
-          />
-        </div>
-
-        <div className="col-span-2 transition-all duration-200 hover:scale-[1.02]">
-          <label className="text-sm font-medium text-gray-600">Department</label>
+        {/* Department */}
+        <div className="col-span-2">
+          <label className="text-sm font-medium text-gray-600">
+            Select Department *
+          </label>
           <DropdownSearch
             options={departmentOptions}
             value={formData.department_id}
-            onChange={(val)=>handleChange("department_id", val)}
+            onChange={(e)=>handleChange("department_id", e.target.value)}
             placeholder="Select department"
           />
         </div>
 
       </div>
 
-      {/* 🔥 BUTTONS */}
+      {/* Buttons */}
       <div className="flex justify-end gap-3 pt-4">
 
         <button 
           onClick={onClose} 
-          className="px-4 py-2 rounded-lg border text-gray-600 hover:bg-gray-100 transition duration-200"
+          className="px-4 py-2 rounded-lg border text-gray-600 hover:bg-gray-100"
         >
           Cancel
         </button>
 
         <button 
           onClick={handleSubmit} 
-          className="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 shadow-md hover:scale-105 transition duration-200"
+          className="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
         >
           Register Employee
         </button>
