@@ -5,38 +5,112 @@ import { PageHeader } from "../../../components/common/PageHeader";
 import { TableActions } from "../../../components/common/TableActions";
 import toast from "react-hot-toast";
 
+// ✅ SERVICES
+import {
+  getDistricts,
+  deleteDistrict,
+} from "../../../services/district.service";
+
 const DistrictList = () => {
   const navigate = useNavigate();
 
   const [districts, setDistricts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // 🔥 Load from localStorage
+  // 🔥 FETCH DATA
+  const fetchDistricts = async () => {
+    try {
+      setLoading(true);
+
+      const res = await getDistricts();
+      console.log("District API:", res);
+
+      // ✅ HANDLE RESPONSE
+      const data = res?.data?.data || res?.data || [];
+
+      // ✅ MAP BACKEND → UI
+      const mapped = data.map((item) => {
+        const id = item.id || item.district_id;
+
+        return {
+          district_id: id,
+          district_name: item.name,
+          district_name_mr: item.name_mr,
+          is_active: item.is_active,
+        };
+      });
+
+      setDistricts(mapped);
+
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load districts");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🔁 LOAD
   useEffect(() => {
-    const data = JSON.parse(localStorage.getItem("districts")) || [];
-    setDistricts(data);
+    fetchDistricts();
   }, []);
 
-  // 🔥 Search
+  // 🔍 SEARCH
   const filteredData = useMemo(() => {
     return districts.filter((d) =>
-      d.district_name.toLowerCase().includes(searchQuery.toLowerCase())
+      d.district_name?.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [districts, searchQuery]);
 
-  // 🔥 Delete
-  const handleDelete = (items) => {
-    const ids = items.map((item) => item.district_id);
+  // 🔥 DELETE (SINGLE + MULTI)
+  const handleDelete = async (items) => {
+    try {
+      if (!items || items.length === 0) {
+        toast.error("No district selected");
+        return;
+      }
 
-    const updated = districts.filter((d) => !ids.includes(d.district_id));
+      const confirmDelete = window.confirm(
+        `Delete ${items.length} district(s)?`
+      );
+      if (!confirmDelete) return;
 
-    setDistricts(updated);
-    localStorage.setItem("districts", JSON.stringify(updated));
+      const ids = items
+        .map((item) => item.district_id)
+        .filter((id) => id !== undefined && id !== null);
 
-    toast.success("Deleted successfully");
+      console.log("Deleting IDs:", ids);
+
+      if (ids.length === 0) {
+        toast.error("Invalid ID");
+        return;
+      }
+
+      // 🔥 CALL DELETE API
+      await Promise.all(ids.map((id) => deleteDistrict(id)));
+
+      // ✅ UPDATE UI IMMEDIATELY
+      setDistricts((prev) =>
+        prev.filter((d) => !ids.includes(d.district_id))
+      );
+
+      toast.success("Deleted successfully");
+
+      // 🔁 OPTIONAL REFRESH (ensures sync)
+      fetchDistricts();
+
+    } catch (error) {
+      console.error(error);
+
+      toast.error(
+        error.response?.data?.message ||
+        "Delete failed"
+      );
+    }
   };
 
-  // 🔥 Columns
+  // 📊 COLUMNS
   const columns = useMemo(
     () => [
       { key: "district_name", header: "Name (EN)" },
@@ -87,6 +161,7 @@ const DistrictList = () => {
       <DataTable
         columns={columns}
         data={filteredData}
+        loading={loading}
         onSearch={setSearchQuery}
         onDelete={handleDelete}
         rowKey="district_id"

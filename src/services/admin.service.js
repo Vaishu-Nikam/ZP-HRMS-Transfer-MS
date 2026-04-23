@@ -1,9 +1,6 @@
-import api from './api';
+import api from "./api";
 
-const getData = (response) => response.data.data || response.data;
-
-// ==================== DASHBOARD ====================
-export const getDashboardStats = async () => {
-    const response = await api.get('/admin/dashboard');
-    return getData(response);
+export const loginUser = async (data) => {
+  const response = await api.post("/auth/login/pune_zp", data);
+  return response.data;
 };
