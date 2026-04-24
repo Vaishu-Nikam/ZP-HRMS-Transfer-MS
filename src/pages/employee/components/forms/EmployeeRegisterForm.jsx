@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Input } from "../../../../components/common/Input";
 import DropdownSearch from "../../../../components/common/DropdownSearch";
+import { registerEmployee } from "../../../../services/employeeService";
 
 const EmployeeRegisterForm = ({ onClose, onSuccess }) => {
 
@@ -35,84 +36,46 @@ const EmployeeRegisterForm = ({ onClose, onSuccess }) => {
     { id: 2, name: "HR Department" }
   ];
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+  try {
 
-    // 🔴 Check all required fields
-    if (!formData.first_name.trim()) {
-      alert("First Name is required");
-      return;
-    }
+    const payload = {
+      email: formData.email,
+      phone: formData.phone,
+      password: "123456",
+      role_id: 4,
+      first_name: formData.first_name,
+      last_name: formData.last_name,
+      middle_name: formData.middle_name,
+      employee_id: formData.employee_id,
+      zp_id: 1,
+      aadhar_number: formData.aadhaar_number,
+      department_id: 4,
+    };
 
-    if (!formData.last_name.trim()) {
-      alert("Last Name is required");
-      return;
-    }
+    const res = await registerEmployee(payload);
 
-    if (!formData.employee_id.trim()) {
-      alert("Employee ID is required");
-      return;
-    }
+    console.log("API Response:", res);
 
-    if (!formData.phone.trim()) {
-      alert("Phone Number is required");
-      return;
-    }
-
-    if (!/^[0-9]{10}$/.test(formData.phone)) {
-      alert("Enter valid 10-digit phone number");
-      return;
-    }
-
-    if (!formData.aadhaar_number.trim()) {
-      alert("Aadhaar Number is required");
-      return;
-    }
-     if (!formData.email.trim()) {
-      alert("Email ID is required");
-      return;
-    }
-
-    if (!/^[0-9]{12}$/.test(formData.aadhaar_number)) {
-      alert("Enter valid 12-digit Aadhaar number");
-      return;
-    }
-
-    if (!formData.role_id) {
-      alert("Please select Designation");
-      return;
-    }
-
-    if (!formData.department_id) {
-      alert("Please select Department");
-      return;
-    }
-
-    // ✅ Save data
-    const employees = JSON.parse(localStorage.getItem("employees")) || [];
-
-    employees.push({
-      id: Date.now(),
-      ...formData,
-      formCompleted: false,
-      formData: {}
-    });
-
-    localStorage.setItem("employees", JSON.stringify(employees));
+    const empId = res[0]?.user_id; 
 
     alert("✅ Employee Registered Successfully");
 
-    onSuccess();
-  };
+    onSuccess(empId); // ✅ BEST WAY
+
+  } catch (error) {
+    console.error(error);
+    alert("❌ Registration Failed");
+  }
+};
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-xl space-y-5">
 
-      {/* Title */}
       <h2 className="text-xl font-semibold text-gray-700 border-b pb-2">
         Employee Registration
       </h2>
 
-      {/* Form */}
       <div className="grid grid-cols-2 gap-4">
 
         <Input
@@ -138,7 +101,7 @@ const EmployeeRegisterForm = ({ onClose, onSuccess }) => {
 
         <Input
           label="Employee ID *"
-          placeholder="Enter Employee ID (e.g. EMP123)"
+          placeholder="Enter Employee ID"
           value={formData.employee_id}
           onChange={(e)=>handleChange("employee_id", e.target.value)}
         />
@@ -152,14 +115,14 @@ const EmployeeRegisterForm = ({ onClose, onSuccess }) => {
 
         <Input
           label="Aadhaar Number *"
-          placeholder="Enter 12-digit Aadhaar"
+          placeholder="Enter Aadhaar"
           value={formData.aadhaar_number}
           onChange={(e)=>handleChange("aadhaar_number", e.target.value)}
         />
 
         <Input
           label="Phone Number *"
-          placeholder="Enter mobile number"
+          placeholder="Enter mobile"
           value={formData.phone}
           onChange={(e)=>handleChange("phone", e.target.value)}
         />
@@ -192,7 +155,6 @@ const EmployeeRegisterForm = ({ onClose, onSuccess }) => {
 
       </div>
 
-      {/* Buttons */}
       <div className="flex justify-end gap-3 pt-4">
 
         <button 
