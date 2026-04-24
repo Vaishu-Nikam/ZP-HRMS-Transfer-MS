@@ -59,10 +59,10 @@ const styles = {
   },
 };
 
-const PersonalPart1Form = ({ onNext, onPrev, onCancel, isFirst, isLast }) => {
+const PersonalPart1Form = ({ onNext, onPrev, onCancel, isFirst, isLast, userId }) => {
 
   const [formData, setFormData] = useState({
-    user_id: 5,
+    user_id:"",
     salutation: "",
     first_name: "",
     middle_name: "",
@@ -111,15 +111,24 @@ const PersonalPart1Form = ({ onNext, onPrev, onCancel, isFirst, isLast }) => {
     { id: 9, name: "General" },
   ];
 
-  const handleSubmit = async () => {
-    try {
-      const res = await saveStep1(formData);
-      console.log("SUCCESS:", res);
-      onNext();
-    } catch (err) {
-      console.error("ERROR:", err.response?.data || err.message);
-    }
-  };
+const handleSubmit = async () => {
+  try {
+    const payload = {
+      ...formData,
+      user_id: userId, 
+    };
+    console.log("STEP 1 PAYLOAD:", payload);
+
+    const res = await saveStep1(payload);
+
+    console.log("SUCCESS:", res);
+    onNext();
+  } catch (err) {
+    console.error("ERROR:", err.response?.data || err.message);
+  }
+};
+
+
 
   const inputStyle = (extraStyle = {}) => ({ ...styles.input, ...extraStyle });
 

@@ -11,7 +11,7 @@ const PersonalPart4Form = ({
   onCancel,
   isFirst,
   isLast,
-  userId = 14,
+  userId = 5,
 }) => {
 
   const [formData, setFormData] = useState({
@@ -58,7 +58,7 @@ const PersonalPart4Form = ({
 
     try {
       const payload = {
-        user_id: 5,
+        user_id: String(userId),
         is_ex_serviceman:     formData.is_ex_serviceman,
         has_domicile_cert:    formData.has_domicile_cert,
         spouse_in_service:    formData.spouse_in_service,

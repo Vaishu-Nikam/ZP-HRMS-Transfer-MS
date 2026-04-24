@@ -1,6 +1,19 @@
-// import api from "./api";
+import api from "./api";
 
-// export const loginUser = async (data) => {
-//   const response = await api.post("/auth/login/pune_zp", data);
-//   return response.data;
-// };
+// ✅ LOGIN
+export const login = async (data) => {
+  const response = await api.post("/auth/login", data);
+  return response.data;
+};
+
+// ✅ LOGOUT
+export const logout = async () => {
+  const response = await api.post("/auth/logout");
+  return response.data;
+};
+
+// ✅ CHANGE PASSWORD
+export const changePassword = async (data) => {
+  const response = await api.post("/auth/change-password", data);
+  return response.data;
+};

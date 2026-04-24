@@ -1,6 +1,16 @@
 import api from "./api";
+const getData = (response) => response.data.data || response.data;
 
-// 📥 DOWNLOAD TEMPLATE
+export const registerEmployee = async (data) => {
+  const response = await api.post("/auth/register_employee", data);
+  return response.data.data || response.data;
+};
+
+export const getEmployees = async (params) => {
+  const response = await api.get("/system/get_employees", { params });
+  return response.data.data || response.data;
+};
+
 export const downloadEmployeeTemplate = async () => {
   try {
     const response = await api.get("/employee/template", {
@@ -31,22 +41,30 @@ export const uploadEmployeeExcel = async (file) => {
     console.error("Upload Excel Error:", error);
     throw error;
   }
-const getData = (response) => response.data.data || response.data;
+};
+
+// GET BY DEPARTMENT ID
+export const getEmployeesByDept = async (deptId) => {
+  const res = await api.get(`/system/get_employees/${deptId}`);
+  return res.data.data || res.data;
+};
+
+
+
 
 /* ================= PERSONAL INFO ================= */
 
-//  GET EMPLOYEES
-export const getEmployees = async (params) => {
-  const response = await api.get("/system/get_employees", { params });
+// ✅ GET BY ID (VIEW)
+export const getEmployeeById = async (id) => {
+  const response = await api.get(`/system/get_employees/${id}`);
   return response.data.data || response.data;
 };
 
-//  REGISTER
-export const registerEmployee = async (data) => {
-  const response = await api.post("/auth/register_employee", data);
-  return response.data.data || response.data;
+// ✅ DELETE
+export const deleteEmployee = async (id) => {
+  const response = await api.delete(`/system/delete_employee/${id}`);
+  return response.data;
 };
-
 /* =================Personal STEP 1 ================= */
 
 export const saveStep1 = async (data) => {
