@@ -5,7 +5,6 @@ import { PageHeader } from '../../../components/common/PageHeader';
 import { TableActions } from '../../../components/common/TableActions';
 import toast from 'react-hot-toast';
 
-// ✅ SERVICES
 import {
   getDepartments,
   deleteDepartment
@@ -18,30 +17,23 @@ const DepartmentList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // 🔥 FETCH DATA
+  // ================= FETCH =================
   const fetchDepartments = async () => {
     try {
       setLoading(true);
 
-      const res = await getDepartments();
-      console.log("Departments API:", res);
+      const data = await getDepartments(); // ✅ already array
+      console.log("Departments:", data);
 
-      // ✅ CORRECT RESPONSE HANDLING
-      const data = res?.data?.data || res?.data || [];
-
-      const mapped = data.map((item) => {
-        const id = item.id || item.department_id;
-
-        return {
-          department_id: id,
-          department_code: item.code,
-          department_name: item.name,
-          department_name_mr: item.name_mr,
-          description: item.description,
-          description_mr: item.description_mr,
-          is_active: item.is_active,
-        };
-      });
+      const mapped = (data || []).map((item) => ({
+        department_id: item.id || item.department_id,
+        department_code: item.code || '',
+        department_name: item.name || '',
+        department_name_mr: item.name_mr || '',
+        description: item.description || '',
+        description_mr: item.description_mr || '',
+        is_active: item.is_active ?? true
+      }));
 
       setDepartments(mapped);
 
@@ -53,104 +45,81 @@ const DepartmentList = () => {
     }
   };
 
-  // 🔁 LOAD
   useEffect(() => {
     fetchDepartments();
   }, []);
 
-  // 🔍 SEARCH
+  // ================= SEARCH =================
   const filteredData = useMemo(() => {
-    return departments.filter(d =>
-      d.department_name?.toLowerCase().includes(searchQuery.toLowerCase())
+    if (!searchQuery.trim()) return departments;
+
+    return departments.filter((d) =>
+      d.department_name
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase())
     );
   }, [departments, searchQuery]);
 
-  // 🔥 DELETE (FINAL FIX)
+  // ================= DELETE =================
   const handleDelete = async (items) => {
     try {
-      if (!items || items.length === 0) {
+      if (!items?.length) {
         toast.error("No department selected");
         return;
       }
 
       const confirmDelete = window.confirm(
-        `Are you sure you want to delete ${items.length} department(s)?`
+        `Delete ${items.length} department(s)?`
       );
-
       if (!confirmDelete) return;
 
-      const ids = items
-        .map(item => item.department_id)
-        .filter(id => id !== undefined && id !== null);
+      const ids = items.map(i => i.department_id).filter(Boolean);
 
-      console.log("Deleting IDs:", ids);
-
-      if (ids.length === 0) {
-        toast.error("Invalid ID. Cannot delete.");
-        return;
-      }
-
-      // 🔥 CALL DELETE API
       await Promise.all(ids.map(id => deleteDepartment(id)));
 
-      // ✅ REMOVE FROM UI IMMEDIATELY
       setDepartments(prev =>
         prev.filter(d => !ids.includes(d.department_id))
       );
 
-      toast.success(`${ids.length} department(s) deleted`);
-
-      // 🔁 OPTIONAL: REFRESH FROM SERVER (ensures sync)
-      fetchDepartments();
+      toast.success("Deleted successfully");
 
     } catch (error) {
-      console.error("DELETE ERROR:", error.response || error);
-
-      toast.error(
-        error.response?.data?.message ||
-        "Delete failed"
-      );
+      console.error(error);
+      toast.error("Delete failed");
     }
   };
 
-  // 📊 COLUMNS
-  const columns = useMemo(
-    () => [
-      { key: 'department_code', header: 'Code' },
-      { key: 'department_name', header: 'Name (EN)' },
-      { key: 'department_name_mr', header: 'Name (MR)' },
-      { key: 'description', header: 'Description' },
-      {
-        key: 'is_active',
-        header: 'Status',
-        render: (_, row) => (
-          <span className={`px-2 py-1 text-xs rounded ${
-            row.is_active
-              ? 'bg-green-100 text-green-700'
-              : 'bg-red-100 text-red-700'
-          }`}>
-            {row.is_active ? 'Active' : 'Inactive'}
-          </span>
-        )
-      },
-      {
-        key: 'actions',
-        header: 'Actions',
-        render: (_value, row, helpers) => (
-          <TableActions
-            onView={() =>
-              navigate(`/masters/departments/view/${row.department_id}`)
-            }
-            onEdit={() =>
-              navigate(`/masters/departments/edit/${row.department_id}`)
-            }
-            onDelete={() => helpers?.onDelete?.()}
-          />
-        ),
-      },
-    ],
-    [navigate]
-  );
+  // ================= COLUMNS =================
+  const columns = useMemo(() => [
+    { key: 'department_code', header: 'Code' },
+    { key: 'department_name', header: 'Name (EN)' },
+    { key: 'department_name_mr', header: 'Name (MR)' },
+    { key: 'description', header: 'Description' },
+    {
+      key: 'is_active',
+      header: 'Status',
+      render: (_, row) => (
+        <span className={`px-2 py-1 text-xs rounded ${
+          row.is_active
+            ? 'bg-green-100 text-green-700'
+            : 'bg-red-100 text-red-700'
+        }`}>
+          {row.is_active ? 'Active' : 'Inactive'}
+        </span>
+      )
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      render: (_v, row, helpers) => (
+        <TableActions
+          onView={() => navigate(`/masters/departments/view/${row.department_id}`)}
+          onEdit={() => navigate(`/masters/departments/edit/${row.department_id}`)}
+          onDelete={() => helpers?.onDelete?.()}
+        />
+      )
+    }
+  ], [navigate]);
 
   return (
     <div className="space-y-6">
@@ -168,7 +137,7 @@ const DepartmentList = () => {
         onSearch={setSearchQuery}
         onDelete={handleDelete}
         rowKey="department_id"
-        showRowNumbers={true}
+        showRowNumbers
       />
     </div>
   );
