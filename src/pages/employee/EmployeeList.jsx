@@ -6,6 +6,7 @@ import { TableActions } from "../../components/common/TableActions";
 import toast from "react-hot-toast";
 import EmployeeRegisterForm from "./components/forms/EmployeeRegisterForm";
 import SendEmailModal from "./components/modals/SendEmailModal";
+import { getEmployees } from "../../services/employeeService";
 
 // ✅ ONLY THESE 2 IMPORTS
 import {
@@ -25,11 +26,19 @@ const EmployeeList = () => {
 
   // 🔷 LOAD FROM LOCAL STORAGE
   useEffect(() => {
-    const data = JSON.parse(localStorage.getItem("employees")) || [];
-    setEmployees(data);
+    fetchEmployees();
   }, []);
 
   // 🔍 SEARCH (IMPROVED)
+  const fetchEmployees = async () => {
+    try {
+      const data = await getEmployees();
+      setEmployees(Array.isArray(data) ? data : data.employees || []);
+    } catch (error) {
+      toast.error("Failed to load employees");
+    }
+  };
+
   const filteredData = useMemo(() => {
     return employees.filter((emp) =>
       (emp.first_name + " " + emp.last_name)
@@ -97,11 +106,7 @@ const EmployeeList = () => {
       {
         key: "name",
         header: "नाव",
-        render: (_, row) => (
-          <span className="font-medium text-gray-800">
-            {row.first_name || "-"} {row.last_name || ""}
-          </span>
-        ),
+        render: (_, row) => `${row.first_name} ${row.last_name}`,
       },
       {
         key: "phone",
@@ -120,27 +125,26 @@ const EmployeeList = () => {
             {row.designation || <span className="text-gray-400 italic">N/A</span>}
           </span>
         ),
+        render: (_, row) => row.phone || "N/A",
       },
       {
-        key: "formCompleted",
+        key: "status",
         header: "STATUS",
         render: (_, row) => (
-          <span
-            className={`px-3 py-1 text-xs rounded-full font-medium ${
-              row.formCompleted
-                ? "bg-green-100 text-green-700"
-                : "bg-yellow-100 text-yellow-700"
-            }`}
-          >
-            {row.formCompleted ? "Completed" : "Pending"}
+          <span className={`px-3 py-1 text-xs rounded-full ${
+            row.current_step > 1
+              ? "bg-green-100 text-green-700"
+              : "bg-yellow-100 text-yellow-700"
+          }`}>
+            {row.current_step > 1 ? "Completed" : "Pending"}
           </span>
         ),
       },
       {
         key: "actions",
         header: "ACTIONS",
-        render: (_value, row, helpers) => (
-          <div className="flex items-center gap-2">
+        render: (_, row) => (
+          <div className="flex gap-2">
 
             {/* ✅ FIXED NAVIGATION */}
             <TableActions
@@ -152,6 +156,14 @@ const EmployeeList = () => {
               <button
                 onClick={() => navigate(`/masters/employees/edit/${row.id}`)}
                 className="px-3 py-1 text-xs rounded-full border border-blue-200 text-blue-600 bg-blue-50 hover:bg-blue-100 transition"
+            <TableActions
+              onView={() => navigate(`view/${row.user_id}`)}
+            />
+
+            {row.current_step === 1 && (
+              <button
+                onClick={() => navigate(`edit/${row.user_id}`)}
+                className="px-3 py-1 text-xs bg-blue-100 text-blue-600 rounded"
               >
                 Complete
               </button>
@@ -162,7 +174,7 @@ const EmployeeList = () => {
                 setSelectedEmployee(row);
                 setShowEmailModal(true);
               }}
-              className="px-3 py-1 text-xs rounded-full border border-purple-200 text-purple-600 bg-purple-50 hover:bg-purple-100 transition"
+              className="px-3 py-1 text-xs bg-purple-100 text-purple-600 rounded"
             >
               Email
             </button>
@@ -217,8 +229,20 @@ const EmployeeList = () => {
           showRowNumbers={true}
         />
       </div>
+      <PageHeader
+        title="कर्मचारी यादी"
+        actionLabel="नवीन कर्मचारी जोडा"
+        onAction={() => setShowRegister(true)}
+      />
 
-      {/* 🔥 REGISTER MODAL */}
+      <DataTable
+        columns={columns}
+        data={filteredData}
+        onSearch={setSearchQuery}
+        rowKey="user_id"
+      />
+
+      {/* REGISTER MODAL */}
       {showRegister && (
         <div
           className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
@@ -231,20 +255,23 @@ const EmployeeList = () => {
             <h2 className="text-lg font-bold mb-4">
               कर्मचारी नोंदणी
             </h2>
+        <div className="fixed inset-0 bg-black/40 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-xl w-[600px]">
 
             <EmployeeRegisterForm
               onClose={() => setShowRegister(false)}
-              onSuccess={() => {
+              onSuccess={(empId) => {
                 setShowRegister(false);
-                const data = JSON.parse(localStorage.getItem("employees")) || [];
-                setEmployees(data);
+
+                // 🔥 STEP1 ला redirect
+                navigate(`/employee/edit/${empId}`);
               }}
             />
           </div>
         </div>
       )}
 
-      {/* 🔥 EMAIL MODAL */}
+      {/* EMAIL MODAL */}
       {showEmailModal && (
         <SendEmailModal
           employee={selectedEmployee}
