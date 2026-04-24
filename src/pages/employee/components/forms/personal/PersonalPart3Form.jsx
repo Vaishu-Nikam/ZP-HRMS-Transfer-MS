@@ -10,7 +10,7 @@ const PersonalPart3Form = ({
   onCancel,
   isFirst,
   isLast,
-  userId = 14,
+userId,
 }) => {
   const [formData, setFormData] = useState({
     retirement_date: "",
@@ -36,39 +36,46 @@ const PersonalPart3Form = ({
   };
 
   const handleSubmit = async () => {
-    setLoading(true);
-    setError(null);
+  setLoading(true);
+  setError(null);
 
-    try {
-      const payload = {
-        user_id: 5,
-        retirement_date: formData.retirement_date,
-        govt_service_joining_date: formData.govt_service_joining_date,
-        current_office_joining_date: formData.current_office_joining_date,
-        sevarth_number: formData.sevarth_number,
-        shaalarth_number: formData.shaalarth_number,
-        height_cm: formData.height_cm,
-        identification_mark: formData.identification_mark,
-      };
+  if (!userId) {
+    setError("User ID मिळाला नाही");
+    setLoading(false);
+    return;
+  }
 
-      console.log("STEP 3 PAYLOAD:", payload);
+  try {
+    const payload = {
+      user_id: String(userId), // ✅ dynamic
+      retirement_date: formData.retirement_date,
+      govt_service_joining_date: formData.govt_service_joining_date,
+      current_office_joining_date: formData.current_office_joining_date,
+      sevarth_number: formData.sevarth_number,
+      shaalarth_number: formData.shaalarth_number,
+      height_cm: formData.height_cm,
+      identification_mark: formData.identification_mark,
+    };
 
-      const res = await saveStep3(payload);
+    console.log("STEP 3 PAYLOAD:", payload);
 
-      console.log("STEP 3 SUCCESS:", res);
-      onNext();
-    } catch (err) {
-      const message =
-        err.response?.data?.message ||
-        err.response?.data?.error ||
-        err.message ||
-        "काहीतरी चूक झाली. पुन्हा प्रयत्न करा.";
-      console.error("STEP 3 ERROR:", err.response?.data || err.message);
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const res = await saveStep3(payload);
+
+    console.log("STEP 3 SUCCESS:", res);
+    onNext();
+  } catch (err) {
+    const message =
+      err.response?.data?.message ||
+      err.response?.data?.error ||
+      err.message ||
+      "काहीतरी चूक झाली. पुन्हा प्रयत्न करा.";
+
+    console.error("STEP 3 ERROR:", err.response?.data || err.message);
+    setError(message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <EmployeeFormCard

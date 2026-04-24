@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-
+import { useParams } from "react-router-dom";
 import { MAIN_TABS, SUB_TABS } from "../../constants/employee/employeeTabs";
 import useEmployeeTabs from "../../hooks/employee/useEmployeeTabs";
 
@@ -56,10 +56,10 @@ import CertificatesForm from "./components/forms/certificates/CertificatesForm";
 
 const EmployeeAdd = () => {
   const navigate = useNavigate();
-
+  const { id } = useParams();
   const { activeMainTab, activeSubTab, handleMainTabChange, setActiveSubTab } =
     useEmployeeTabs();
-
+  console.log("USER ID FROM URL:", id);
   const subTabs = SUB_TABS[activeMainTab];
   const currentIndex = subTabs.indexOf(activeSubTab);
 
@@ -96,6 +96,7 @@ const EmployeeAdd = () => {
       />
       {activeMainTab === "personal" && activeSubTab === "भाग 1" && (
         <PersonalPart1Form
+          userId={id} 
           onNext={handleNext}
           onPrev={handlePrev}
           onCancel={() => navigate("/employee")}
@@ -105,6 +106,7 @@ const EmployeeAdd = () => {
       )}
       {activeMainTab === "personal" && activeSubTab === "भाग 2" && (
         <PersonalPart2Form
+          userId={id} 
           onNext={handleNext}
           onPrev={handlePrev}
           onCancel={() => navigate("/employee")}
@@ -114,6 +116,7 @@ const EmployeeAdd = () => {
       )}
       {activeMainTab === "personal" && activeSubTab === "भाग 3" && (
         <PersonalPart3Form
+         userId={id} 
           onNext={handleNext}
           onPrev={handlePrev}
           onCancel={() => navigate("/employee")}
@@ -123,6 +126,7 @@ const EmployeeAdd = () => {
       )}
       {activeMainTab === "personal" && activeSubTab === "भाग 4" && (
         <PersonalPart4Form
+         userId={id} 
           onNext={handleNext}
           onPrev={handlePrev}
           onCancel={() => navigate("/employee")}
@@ -132,6 +136,7 @@ const EmployeeAdd = () => {
       )}
       {activeMainTab === "personal" && activeSubTab === "भाग 5" && (
         <PersonalPart5Form
+          userId={id}
           onNext={handleNext}
           onPrev={handlePrev}
           onCancel={() => navigate("/employee")}
@@ -141,6 +146,7 @@ const EmployeeAdd = () => {
       )}
       {activeMainTab === "personal" && activeSubTab === "भाग 6" && (
         <PersonalPart6Form
+          userId={id}
           onNext={handleNext}
           onPrev={handlePrev}
           onCancel={() => navigate("/employee")}

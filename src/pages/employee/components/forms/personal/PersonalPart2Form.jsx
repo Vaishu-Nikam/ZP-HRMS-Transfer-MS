@@ -11,7 +11,7 @@ const PersonalPart2Form = ({
   onCancel,
   isFirst,
   isLast,
-  userId = 5, 
+  userId,
 }) => {
 
   const [formData, setFormData] = useState({
@@ -47,36 +47,43 @@ const PersonalPart2Form = ({
   ];
 
   // ─── Submit ───────────────────────────────────────────────────────────────
-  const handleSubmit = async () => {
-    setLoading(true);
-    setError(null);
+ const handleSubmit = async () => {
+  setLoading(true);
+  setError(null);
 
-    try {
-      const payload = {
-        user_id: String(userId),
-        first_appointment_type: formData.first_appointment_type,
-        cadre_service_name: formData.cadre_service_name,
-        dept_entry_exam_date: formData.dept_entry_exam_date,
-      };
+  if (!userId) {
+    setError("User ID मिळाला नाही");
+    setLoading(false); // ✅ fix
+    return;
+  }
 
-      console.log("STEP 2 PAYLOAD:", payload);
+  try {
+    const payload = {
+      user_id: String(userId),
+      first_appointment_type: formData.first_appointment_type,
+      cadre_service_name: formData.cadre_service_name,
+      dept_entry_exam_date: formData.dept_entry_exam_date,
+    };
 
-      const res = await saveStep2(payload);
+    console.log("STEP 2 PAYLOAD:", payload);
 
-      console.log("STEP 2 SUCCESS:", res);
-      onNext();
-    } catch (err) {
-      const message =
-        err.response?.data?.message ||
-        err.response?.data?.error ||
-        err.message ||
-        "काहीतरी चूक झाली. पुन्हा प्रयत्न करा.";
-      console.error("STEP 2 ERROR:", err.response?.data || err.message);
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const res = await saveStep2(payload);
+
+    console.log("STEP 2 SUCCESS:", res);
+    onNext();
+  } catch (err) {
+    const message =
+      err.response?.data?.message ||
+      err.response?.data?.error ||
+      err.message ||
+      "काहीतरी चूक झाली. पुन्हा प्रयत्न करा.";
+
+    console.error("STEP 2 ERROR:", err.response?.data || err.message);
+    setError(message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <EmployeeFormCard
