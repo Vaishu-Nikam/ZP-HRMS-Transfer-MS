@@ -1,30 +1,26 @@
-import api from "./api";
+import api from './api';
 
-// ✅ GET ALL
+// ✅ ALWAYS RETURN ARRAY / OBJECT CLEANLY
 export const getDepartments = async () => {
-  const res = await api.get("/departments");
-  return res.data;
+  const res = await api.get('/departments');
+  return res.data.data; // 🔥 ONLY THIS
 };
 
-// ✅ GET BY ID
 export const getDepartmentById = async (id) => {
   const res = await api.get(`/departments/${id}`);
+  return res.data.data;
+};
+
+export const createDepartment = async (payload) => {
+  const res = await api.post('/departments', payload);
   return res.data;
 };
 
-// ✅ CREATE
-export const createDepartment = async (data) => {
-  const res = await api.post("/departments", data);
+export const updateDepartment = async (id, payload) => {
+  const res = await api.put(`/departments/${id}`, payload);
   return res.data;
 };
 
-// ✅ UPDATE
-export const updateDepartment = async (id, data) => {
-  const res = await api.put(`/departments/${id}`, data);
-  return res.data;
-};
-
-// ✅ DELETE
 export const deleteDepartment = async (id) => {
   const res = await api.delete(`/departments/${id}`);
   return res.data;

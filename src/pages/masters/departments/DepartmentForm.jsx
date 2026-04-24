@@ -7,7 +7,6 @@ import { Building } from 'lucide-react';
 import FormLayout from '../../../components/common/FormLayout';
 import ToggleSwitch from '../../../components/common/ToggleSwitch';
 
-// ✅ API SERVICES
 import {
   getDepartmentById,
   createDepartment,
@@ -25,12 +24,11 @@ const DepartmentForm = ({ isViewMode = false }) => {
     department_code: '',
     department_name: '',
     department_name_mr: '',
-    description: '',
-    description_mr: '',
-    is_active: true
+    zp_id: '',
+    is_active: true // UI only
   });
 
-  // 🔥 LOAD DATA (EDIT MODE)
+  // ================== LOAD (EDIT MODE) ==================
   useEffect(() => {
     if (!isEditMode) return;
 
@@ -38,18 +36,13 @@ const DepartmentForm = ({ isViewMode = false }) => {
       try {
         setLoading(true);
 
-        const res = await getDepartmentById(id);
-        console.log("API Response:", res);
-
-        // 🔥 SAFE RESPONSE HANDLING
-        const data = res?.data || res;
+        const data = await getDepartmentById(id); // ✅ FIXED
 
         setFormData({
           department_code: data?.code || '',
           department_name: data?.name || '',
           department_name_mr: data?.name_mr || '',
-          description: data?.description || '',
-          description_mr: data?.description_mr || '',
+          zp_id: data?.zp_id || '',
           is_active: data?.is_active ?? true
         });
 
@@ -64,29 +57,25 @@ const DepartmentForm = ({ isViewMode = false }) => {
     fetchDepartment();
   }, [id, isEditMode]);
 
-  // 🔥 SUBMIT (CREATE / UPDATE)
+  // ================== SUBMIT ==================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.department_code) {
-      toast.error('Department Code is required');
-      return;
-    }
+    // Validation
+    if (!formData.department_code) return toast.error('Department Code is required');
+    if (!formData.department_name) return toast.error('Department Name is required');
+    if (!formData.department_name_mr) return toast.error('Marathi Name is required');
+    if (!formData.zp_id) return toast.error('ZP ID is required');
 
-    if (!formData.department_name) {
-      toast.error('Department Name is required');
-      return;
-    }
-
-    // 🔥 MAP FRONTEND → BACKEND
+    // ✅ MATCH BACKEND BODY EXACTLY
     const payload = {
       code: formData.department_code,
       name: formData.department_name,
       name_mr: formData.department_name_mr,
-      description: formData.description,
-      description_mr: formData.description_mr,
-      is_active: formData.is_active
+      zp_id: Number(formData.zp_id)
     };
+
+    console.log("FINAL PAYLOAD:", payload);
 
     try {
       setLoading(true);
@@ -105,7 +94,7 @@ const DepartmentForm = ({ isViewMode = false }) => {
       console.error(error);
 
       toast.error(
-        error.response?.data?.message ||
+        error?.response?.data?.message ||
         "Failed to save department"
       );
 
@@ -124,6 +113,7 @@ const DepartmentForm = ({ isViewMode = false }) => {
       isViewMode={isViewMode}
       loading={loading}
     >
+      {/* Department Code */}
       <Input
         label="Department Code"
         value={formData.department_code}
@@ -138,6 +128,21 @@ const DepartmentForm = ({ isViewMode = false }) => {
         disabled={isEditMode}
       />
 
+      {/* ZP ID */}
+      <Input
+        label="ZP ID"
+        value={formData.zp_id}
+        onChange={(e) =>
+          setFormData(prev => ({
+            ...prev,
+            zp_id: e.target.value
+          }))
+        }
+        placeholder="Enter ZP ID"
+        required
+      />
+
+      {/* Department Name */}
       <TransliteratedInput
         label="Department Name"
         value={formData.department_name}
@@ -159,25 +164,7 @@ const DepartmentForm = ({ isViewMode = false }) => {
         required
       />
 
-      <TransliteratedInput
-        label="Description"
-        value={formData.description}
-        onChange={(e) =>
-          setFormData(prev => ({
-            ...prev,
-            description: e.target.value
-          }))
-        }
-        valueMr={formData.description_mr}
-        onChangeMr={(e) =>
-          setFormData(prev => ({
-            ...prev,
-            description_mr: e.target.value
-          }))
-        }
-        isTextArea
-      />
-
+      {/* Optional UI Toggle (not sent to API) */}
       <ToggleSwitch
         label="Active Status"
         description={formData.is_active ? 'Active' : 'Inactive'}
