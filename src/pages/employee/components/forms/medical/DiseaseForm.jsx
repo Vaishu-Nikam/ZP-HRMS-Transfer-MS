@@ -3,11 +3,11 @@ import EmployeeFormCard from "../../../../../components/employee/layout/Employee
 import DatePicker from "../../../../../components/common/DatePicker";
 import { Input } from "../../../../../components/common/Input";
 import DropdownSearch from "../../../../../components/common/DropdownSearch";
+import { saveMedicalStep1 } from "../../../../../services/employeeService";
 
-const DiseaseForm = (props) => {
-
+const DiseaseForm = ({ onNext, onPrev, onCancel, isFirst, isLast, userId }) => {
   const [records, setRecords] = useState([
-    { disease: "", fromDate: "", toDate: "", remark: "" }
+    { disease: "", fromDate: "", toDate: "", remark: "" },
   ]);
 
   const [medical, setMedical] = useState({
@@ -21,6 +21,8 @@ const DiseaseForm = (props) => {
     divorcedFemale: "",
     otherDisease: "",
   });
+
+  const [loading, setLoading] = useState(false);
 
   const yesNo = [
     { id: "होय", name: "होय" },
@@ -37,14 +39,66 @@ const DiseaseForm = (props) => {
     setMedical({ ...medical, [field]: value });
   };
 
-  return (
-    <EmployeeFormCard title="आजार माहिती" {...props}>
-      <div className="space-y-6">
+  // 🔥 SUBMIT FUNCTION
+  const handleSubmit = async () => {
+    try {
+      if (!userId) return;
 
+      setLoading(true);
+
+      const payload = {
+        user_id: userId,
+
+        has_brain_thalassemia_child:
+          medical.brainDiseaseParent === "होय" ? "true" : "false",
+
+        has_chromosomal_disorder_child:
+          medical.geneticDiseaseParent === "होय" ? "true" : "false",
+
+        has_paralysis: medical.paralysis === "होय" ? "true" : "false",
+
+        has_mentally_disabled_child:
+          medical.disabledChildParent === "होय" ? "true" : "false",
+
+        has_kidney_dialysis: medical.kidneyIssue === "होय" ? "true" : "false",
+
+        has_cancer: medical.cancer === "होय" ? "true" : "false",
+
+        is_veteran_spouse_widow:
+          medical.exServicemanWidow === "होय" ? "true" : "false",
+
+        is_abandoned_divorced_woman:
+          medical.divorcedFemale === "होय" ? "true" : "false",
+
+        other_conditions: medical.otherDisease || "",
+      };
+
+      console.log("MEDICAL PAYLOAD:", payload);
+
+      await saveMedicalStep1(payload);
+
+      onNext();
+    } catch (err) {
+      console.error("Medical API Error:", err.response?.data || err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <EmployeeFormCard
+      title="आजार माहिती"
+      onNext={handleSubmit}
+      onPrev={onPrev}
+      onCancel={onCancel}
+      isFirst={isFirst}
+      isLast={isLast}
+      loading={loading}
+    >
+      <div className="space-y-6">
         {/* 🔹 Disease Fields */}
         {records.map((r, i) => (
           <div key={i} className="grid grid-cols-2 gap-4">
-
             <Input
               label="आजाराचे नाव"
               value={r.disease}
@@ -68,117 +122,79 @@ const DiseaseForm = (props) => {
               value={r.remark}
               onChange={(e) => handleChange(i, "remark", e.target.value)}
             />
-
           </div>
         ))}
 
-        {/* 🔹 Section 34 Fields */}
+        {/* 🔹 Medical Conditions */}
         <div className="grid grid-cols-2 gap-4">
+          <DropdownSearch
+            value={medical.brainDiseaseParent}
+            onChange={(e) =>
+              handleMedical("brainDiseaseParent", e.target.value)
+            }
+            options={yesNo}
+            placeholder="मेंदूचा आजार/थॅलेसेमिया मुलांचे पालक?"
+          />
 
-          <div>
-            <label className="text-sm font-medium">
-              मेंदूचा आजार/थॅलेसेमिया मुलांचे पालक आहात का?
-            </label>
-            <DropdownSearch
-              value={medical.brainDiseaseParent}
-              onChange={(e) => handleMedical("brainDiseaseParent", e.target.value)}
-              options={yesNo}
-              placeholder="निवडा"
-            />
-          </div>
+          <DropdownSearch
+            value={medical.geneticDiseaseParent}
+            onChange={(e) =>
+              handleMedical("geneticDiseaseParent", e.target.value)
+            }
+            options={yesNo}
+            placeholder="गुणसूत्र दोष मुलांचे पालक?"
+          />
 
-          <div>
-            <label className="text-sm font-medium">
-              गुणसूत्र दोष असलेल्या मुलांचे पालक आहात का?
-            </label>
-            <DropdownSearch
-              value={medical.geneticDiseaseParent}
-              onChange={(e) => handleMedical("geneticDiseaseParent", e.target.value)}
-              options={yesNo}
-              placeholder="निवडा"
-            />
-          </div>
+          <DropdownSearch
+            value={medical.paralysis}
+            onChange={(e) => handleMedical("paralysis", e.target.value)}
+            options={yesNo}
+            placeholder="पक्षघात आहे का?"
+          />
 
-          <div>
-            <label className="text-sm font-medium">
-              पक्षघाताने आजारी आहात का?
-            </label>
-            <DropdownSearch
-              value={medical.paralysis}
-              onChange={(e) => handleMedical("paralysis", e.target.value)}
-              options={yesNo}
-              placeholder="निवडा"
-            />
-          </div>
+          <DropdownSearch
+            value={medical.disabledChildParent}
+            onChange={(e) =>
+              handleMedical("disabledChildParent", e.target.value)
+            }
+            options={yesNo}
+            placeholder="अपंग मुलांचे पालक?"
+          />
 
-          <div>
-            <label className="text-sm font-medium">
-              मतीमंद/अपंग मुलांचे पालक आहात का?
-            </label>
-            <DropdownSearch
-              value={medical.disabledChildParent}
-              onChange={(e) => handleMedical("disabledChildParent", e.target.value)}
-              options={yesNo}
-              placeholder="निवडा"
-            />
-          </div>
+          <DropdownSearch
+            value={medical.kidneyIssue}
+            onChange={(e) => handleMedical("kidneyIssue", e.target.value)}
+            options={yesNo}
+            placeholder="किडनी समस्या?"
+          />
 
-          <div>
-            <label className="text-sm font-medium">
-              किडनी/डायलिसिस समस्या आहे का?
-            </label>
-            <DropdownSearch
-              value={medical.kidneyIssue}
-              onChange={(e) => handleMedical("kidneyIssue", e.target.value)}
-              options={yesNo}
-              placeholder="निवडा"
-            />
-          </div>
+          <DropdownSearch
+            value={medical.cancer}
+            onChange={(e) => handleMedical("cancer", e.target.value)}
+            options={yesNo}
+            placeholder="कर्करोग आहे का?"
+          />
 
-          <div>
-            <label className="text-sm font-medium">
-              कर्करोग आहे का?
-            </label>
-            <DropdownSearch
-              value={medical.cancer}
-              onChange={(e) => handleMedical("cancer", e.target.value)}
-              options={yesNo}
-              placeholder="निवडा"
-            />
-          </div>
+          <DropdownSearch
+            value={medical.exServicemanWidow}
+            onChange={(e) => handleMedical("exServicemanWidow", e.target.value)}
+            options={yesNo}
+            placeholder="माजी सैनिक/विधवा?"
+          />
 
-          <div>
-            <label className="text-sm font-medium">
-              माजी सैनिक/विधवा आहात का?
-            </label>
-            <DropdownSearch
-              value={medical.exServicemanWidow}
-              onChange={(e) => handleMedical("exServicemanWidow", e.target.value)}
-              options={yesNo}
-              placeholder="निवडा"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium">
-              घटस्फोटीत महिला कर्मचारी आहात का?
-            </label>
-            <DropdownSearch
-              value={medical.divorcedFemale}
-              onChange={(e) => handleMedical("divorcedFemale", e.target.value)}
-              options={yesNo}
-              placeholder="निवडा"
-            />
-          </div>
+          <DropdownSearch
+            value={medical.divorcedFemale}
+            onChange={(e) => handleMedical("divorcedFemale", e.target.value)}
+            options={yesNo}
+            placeholder="घटस्फोटीत महिला?"
+          />
 
           <Input
             label="इतर आजार"
             value={medical.otherDisease}
             onChange={(e) => handleMedical("otherDisease", e.target.value)}
           />
-
         </div>
-
       </div>
     </EmployeeFormCard>
   );

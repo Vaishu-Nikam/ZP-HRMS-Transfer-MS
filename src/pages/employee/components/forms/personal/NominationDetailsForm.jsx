@@ -3,6 +3,7 @@ import EmployeeFormCard from "../../../../../components/employee/layout/Employee
 import { Input } from "../../../../../components/common/Input";
 import DropdownSearch from "../../../../../components/common/DropdownSearch";
 import { Textarea } from "../../../../../components/common/Textarea";
+import { saveStep10 } from "../../../../../services/employeeService";
 
 const NominationDetailsForm = ({
   onNext,
@@ -10,7 +11,9 @@ const NominationDetailsForm = ({
   onCancel,
   isFirst,
   isLast,
+  userId,
 }) => {
+
   const [records, setRecords] = useState([
     {
       nominationType: "",
@@ -63,10 +66,73 @@ const NominationDetailsForm = ({
     setRecords(updated);
   };
 
+  // ✅ middle name auto
+  const getMiddleName = (name) => {
+    if (!name) return "NA";
+    const parts = name.trim().split(" ");
+    return parts.length > 1 ? parts[1] : "NA";
+  };
+
+
+  const handleSubmit = async () => {
+    try {
+
+      if (!userId) {
+        alert("User ID missing");
+        return;
+      }
+
+      for (let item of records) {
+
+        // ✅ validation
+        if (
+          !item.nominationType ||
+          !item.nomineeName ||
+          !item.relation ||
+          !item.age ||
+          !item.share
+        ) {
+          alert("सर्व माहिती भरा");
+          return;
+        }
+
+        const payload = {
+          user_id: userId,
+
+        
+          nomination_type: item.nominationType?.id || item.nominationType,
+          nominee_name: item.nomineeName,
+          middle_name: getMiddleName(item.nomineeName),
+          relation_to_employee: item.relation,
+          nominee_age: Number(item.age) || 0,
+          share_percentage: Number(item.share.split("/")[0]),
+          contingency_event: item.condition ? 2 : 1,
+          alternate_nominee_name: item.altNomineeName || "",
+          alternate_nominee_relation: item.altRelation || "",
+          alternate_nominee_address: item.altAddress || "",
+        };
+
+        console.log("FINAL PAYLOAD:", payload);
+
+        await saveStep10(payload);
+      }
+
+      alert("नामनिर्देशन माहिती जतन झाली ✅");
+      onNext();
+
+    } catch (err) {
+      console.log("ERROR:", err);
+      console.log("RESPONSE:", err.response);
+      console.log("DATA:", err.response?.data);
+
+      alert(err.response?.data?.message || "API Error");
+    }
+  };
+
   return (
     <EmployeeFormCard
       title="विविध नामनिर्देशन माहिती"
-      onNext={onNext}
+      onNext={handleSubmit}
       onPrev={onPrev}
       onCancel={onCancel}
       isFirst={isFirst}
@@ -78,7 +144,6 @@ const NominationDetailsForm = ({
             key={index}
             className="border border-slate-200 rounded-xl p-4 bg-slate-50"
           >
-            {/* Header */}
             <div className="flex justify-between items-center mb-3">
               <h3 className="text-sm font-semibold text-slate-700">
                 नामनिर्देशन {index + 1}
@@ -95,7 +160,7 @@ const NominationDetailsForm = ({
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              {/* Dropdown */}
+
               <div className="col-span-2">
                 <DropdownSearch
                   options={nominationOptions}
@@ -131,15 +196,13 @@ const NominationDetailsForm = ({
               />
 
               <Input
-                label="नामनिर्देशित व्यक्तीला देय असलेला रकमेचा भाग (In Percentage उदा. 78/100)"
+                label="रकमेचा भाग (%)"
                 value={item.share}
                 onChange={(e) => handleChange(index, "share", e.target.value)}
               />
 
-           
-
               <Input
-                label="वर्गणीदाराच्या आधी नामनिर्देशित व्यक्ती मरण पावल्यास तिचा हक्क ज्या व्यक्तीकडे जाईल त्या व्यक्तीचे नाव"
+                label="पर्यायी नामनिर्देशित व्यक्तीचे नाव"
                 value={item.altNomineeName}
                 onChange={(e) =>
                   handleChange(index, "altNomineeName", e.target.value)
@@ -147,15 +210,15 @@ const NominationDetailsForm = ({
               />
 
               <Input
-                label="वर्गणीदाराच्या आधी नामनिर्देशित व्यक्ती मरण पावल्यास तिचा हक्क ज्या व्यक्तीकडे जाईल त्या व्यक्तीचे वर्गणीदाराशी नाते"
+                label="पर्यायी नाते"
                 value={item.altRelation}
                 onChange={(e) =>
                   handleChange(index, "altRelation", e.target.value)
                 }
               />
 
-                 <Textarea
-                label="ज्या घटना घडल्यामुळे नामनिर्देशन विधिअग्राह्य ठरेल अशा आकस्मिक घटना"
+              <Textarea
+                label="आकस्मिक घटना"
                 rows={3}
                 value={item.condition}
                 onChange={(e) =>
@@ -164,7 +227,7 @@ const NominationDetailsForm = ({
               />
 
               <Textarea
-                label="वर्गणीदाराच्या आधी नामनिर्देशित व्यक्ती मरण पावल्यास तिचा हक्क ज्या व्यक्तीकडे जाईल त्या व्यक्तीचा पत्ता"
+                label="पर्यायी पत्ता"
                 rows={3}
                 value={item.altAddress}
                 onChange={(e) =>
@@ -175,7 +238,6 @@ const NominationDetailsForm = ({
           </div>
         ))}
 
-        {/* Add Button */}
         <button onClick={addRow} className="btn-primary">
           + नामनिर्देशन जोडा
         </button>

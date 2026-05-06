@@ -3,8 +3,16 @@ import EmployeeFormCard from "../../../../../components/employee/layout/Employee
 import DatePicker from "../../../../../components/common/DatePicker";
 import { Input } from "../../../../../components/common/Input";
 import DropdownSearch from "../../../../../components/common/DropdownSearch";
+import { saveDiscussionStep4 } from "../../../../../services/employeeService";
 
-const CourtCaseForm = (props) => {
+const CourtCaseForm = ({
+  onNext,
+  onPrev,
+  onCancel,
+  isFirst,
+  isLast,
+  userId,
+}) => {
 
   const [records, setRecords] = useState([
     {
@@ -20,6 +28,12 @@ const CourtCaseForm = (props) => {
     { id: "होय", name: "होय" },
     { id: "नाही", name: "नाही" },
   ];
+
+  const formatDate = (date) => {
+    if (!date) return "";
+    const d = new Date(date);
+    return d.toISOString().split("T")[0];
+  };
 
   const handleChange = (i, field, value) => {
     const data = [...records];
@@ -52,14 +66,66 @@ const CourtCaseForm = (props) => {
     setRecords(records.filter((_, index) => index !== i));
   };
 
+  // ✅ SUBMIT (API Integration)
+  const handleSubmit = async () => {
+    try {
+      if (!userId) {
+        alert("User ID missing");
+        return;
+      }
+
+      for (let item of records) {
+
+        if (!item.isCourtCase) {
+          alert("सर्व माहिती भरा");
+          return;
+        }
+
+        const formData = new FormData();
+
+        formData.append("user_id", userId);
+        formData.append(
+          "case_active",
+          item.isCourtCase === "होय" ? "true" : "false"
+        );
+        formData.append("court_name", item.courtName);
+        formData.append("order_number", item.orderNo);
+        formData.append("order_date", formatDate(item.orderDate));
+
+        if (item.document) {
+          formData.append("order_cert", item.document);
+        }
+
+        console.log("FORMDATA:", [...formData]);
+
+        await saveDiscussionStep4(formData);
+      }
+
+      onNext();
+
+    } catch (err) {
+      console.log("ERROR:", err);
+      console.log("RESPONSE:", err.response);
+      console.log("DATA:", err.response?.data);
+
+      alert(err.response?.data?.message || "API Error");
+    }
+  };
+
   return (
-    <EmployeeFormCard title="न्यायालयीन प्रकरण माहिती" {...props}>
+    <EmployeeFormCard
+      title="न्यायालयीन प्रकरण माहिती"
+      onNext={handleSubmit}
+      onPrev={onPrev}
+      onCancel={onCancel}
+      isFirst={isFirst}
+      isLast={isLast}
+    >
       <div className="space-y-6">
 
         {records.map((r, i) => (
           <div key={i} className="space-y-4">
 
-            {/* Header */}
             {records.length > 1 && (
               <div className="flex justify-between">
                 <h3 className="text-sm font-semibold">
@@ -74,10 +140,8 @@ const CourtCaseForm = (props) => {
               </div>
             )}
 
-            {/* Form */}
             <div className="grid grid-cols-2 gap-4">
 
-              {/* कोर्ट केस आहे का */}
               <div>
                 <label className="text-sm font-medium">
                   न्यायालयीन प्रकरण सुरु आहे का?
@@ -92,25 +156,24 @@ const CourtCaseForm = (props) => {
                 />
               </div>
 
-              {/* कोर्ट नाव */}
               <Input
                 label="न्यायालयाचे नाव"
+                placeholder="उदा. जिल्हा न्यायालय"
                 value={r.courtName}
                 onChange={(e) =>
                   handleChange(i, "courtName", e.target.value)
                 }
               />
 
-              {/* आदेश क्रमांक */}
               <Input
                 label="आदेश क्रमांक"
+                placeholder="उदा. 12345"
                 value={r.orderNo}
                 onChange={(e) =>
                   handleChange(i, "orderNo", e.target.value)
                 }
               />
 
-              {/* आदेश दिनांक */}
               <DatePicker
                 label="आदेश दिनांक"
                 value={r.orderDate}
@@ -119,7 +182,6 @@ const CourtCaseForm = (props) => {
                 }
               />
 
-              {/* File Upload */}
               <div className="col-span-2">
                 <label className="text-sm font-medium">
                   आदेश (2MB)
@@ -137,7 +199,6 @@ const CourtCaseForm = (props) => {
           </div>
         ))}
 
-        {/* Add Button */}
         <button onClick={addRow} className="btn-primary">
           + रेकॉर्ड जोडा
         </button>

@@ -3,6 +3,7 @@ import EmployeeFormCard from "../../../../../components/employee/layout/Employee
 import DatePicker from "../../../../../components/common/DatePicker";
 import { Input } from "../../../../../components/common/Input";
 import DropdownSearch from "../../../../../components/common/DropdownSearch";
+import { saveDiscussionStep2 } from "../../../../../services/employeeService";
 
 const DepartmentEnquiryForm = (props) => {
 
@@ -38,6 +39,66 @@ const DepartmentEnquiryForm = (props) => {
     handleChange(i, "document", file);
   };
 
+  const formatDate = (date) => {
+    if (!date) return "";
+    return new Date(date).toISOString().split("T")[0];
+  };
+
+  // 🔥 API SUBMIT (ONLY ADDITION)
+  const handleSubmit = async () => {
+    try {
+      if (!props.userId) {
+        alert("User ID missing");
+        return;
+      }
+
+      for (let item of records) {
+
+        if (!item.isEnquiry || !item.fromDate) {
+          alert("सर्व माहिती भरा");
+          return;
+        }
+
+        const formData = new FormData();
+
+        formData.append("user_id", props.userId);
+        formData.append(
+          "inquiry_active",
+          item.isEnquiry === "होय" ? "true" : "false"
+        );
+        formData.append("inquiry_from", formatDate(item.fromDate));
+        formData.append("final_decision", item.finalDecision || "");
+        formData.append("decision_details", item.finalDecision || "");
+        formData.append(
+          "disciplinary_start_date",
+          formatDate(item.disciplineDate)
+        );
+        formData.append(
+          "inquiry_officer_date",
+          formatDate(item.disciplineDate)
+        );
+        formData.append("penalty_order_number", item.orderNo || "");
+        formData.append("penalty_type", item.punishmentType || "");
+        formData.append(
+          "penalty_order_date",
+          formatDate(item.orderDate)
+        );
+
+        if (item.document) {
+          formData.append("penalty_order_cert", item.document);
+        }
+
+        await saveDiscussionStep2(formData);
+      }
+
+      props.onNext && props.onNext();
+
+    } catch (err) {
+      console.log("❌ ERROR:", err.response?.data || err.message);
+      alert(err.response?.data?.message || "API Error");
+    }
+  };
+
   const addRow = () => {
     setRecords([
       ...records,
@@ -59,13 +120,16 @@ const DepartmentEnquiryForm = (props) => {
   };
 
   return (
-    <EmployeeFormCard title="विभागीय चौकशी" {...props}>
+    <EmployeeFormCard
+      title="विभागीय चौकशी"
+      {...props}
+      onNext={handleSubmit}   // 🔥 ONLY CHANGE HERE
+    >
       <div className="space-y-6">
 
         {records.map((r, i) => (
           <div key={i} className="space-y-4">
 
-            {/* Header */}
             {records.length > 1 && (
               <div className="flex justify-between">
                 <h3 className="text-sm font-semibold">
@@ -80,10 +144,8 @@ const DepartmentEnquiryForm = (props) => {
               </div>
             )}
 
-            {/* Form */}
             <div className="grid grid-cols-2 gap-4">
 
-              {/* चौकशी */}
               <div>
                 <label className="text-sm font-medium">
                   विभागीय चौकशी सुरु/प्रलंबित आहे का?
@@ -163,7 +225,6 @@ const DepartmentEnquiryForm = (props) => {
           </div>
         ))}
 
-        {/* Add Button */}
         <button onClick={addRow} className="btn-primary">
           + रेकॉर्ड जोडा
         </button>

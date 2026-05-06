@@ -7,7 +7,6 @@ import toast from "react-hot-toast";
 import EmployeeRegisterForm from "./components/forms/EmployeeRegisterForm";
 import SendEmailModal from "./components/modals/SendEmailModal";
 
-
 import {
   downloadEmployeeTemplate,
   uploadEmployeeExcel,
@@ -48,18 +47,18 @@ const EmployeeList = () => {
     );
   }, [employees, searchQuery]);
 
- const handleDelete = async (items) => {
-  try {
-    for (const item of items) {
-      await deleteEmployee(item.user_id); 
-    }
+  const handleDelete = async (items) => {
+    try {
+      for (const item of items) {
+        await deleteEmployee(item.user_id);
+      }
 
-    toast.success("Deleted successfully");
-    fetchEmployees(); 
-  } catch (error) {
-    toast.error("Delete failed");
-  }
-};
+      toast.success("Deleted successfully");
+      fetchEmployees();
+    } catch (error) {
+      toast.error("Delete failed");
+    }
+  };
 
   const handleDownloadTemplate = async () => {
     try {
@@ -117,12 +116,12 @@ const EmployeeList = () => {
         render: (_, row) => (
           <span
             className={`px-3 py-1 text-xs rounded-full ${
-              row.current_step > 1
-                ? "bg-green-100 text-green-700"
-                : "bg-yellow-100 text-yellow-700"
+              row.current_step === "completed"
+                ? "bg-green-100 text-green-600"
+                : "bg-yellow-100 text-yellow-600" 
             }`}
           >
-            {row.current_step > 1 ? "Completed" : "Pending"}
+            {row.current_step ? "In Progress" : "Not Started"}
           </span>
         ),
       },
@@ -136,15 +135,15 @@ const EmployeeList = () => {
               onDelete={() => helpers?.onDelete?.([row])}
             />
 
-            {/* ✅ ONLY CHANGE HERE */}
-            {row.current_step === 1 && (
-              <button
-                onClick={() => navigate(`/employees/edit/${row.user_id}`)}
-                className="px-3 py-1 text-xs bg-blue-100 text-blue-600 rounded"
-              >
-                Complete
-              </button>
-            )}
+            
+{row.current_step !== "completed" && (
+  <button
+    onClick={() => navigate(`/employees/edit/${row.user_id}`)}
+    className="px-3 py-1 text-xs bg-blue-100 text-blue-600 rounded"
+  >
+    Complete
+  </button>
+)}
 
             <button
               onClick={() => {

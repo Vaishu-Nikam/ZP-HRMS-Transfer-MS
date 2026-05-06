@@ -2,9 +2,9 @@ import { useState } from "react";
 import EmployeeFormCard from "../../../../../components/employee/layout/EmployeeFormCard";
 import DatePicker from "../../../../../components/common/DatePicker";
 import { Input } from "../../../../../components/common/Input";
+import { saveGroupInsurance } from "../../../../../services/employeeService";
 
 const InsuranceForm = (props) => {
-
   const [records, setRecords] = useState([
     {
       year: "",
@@ -13,6 +13,41 @@ const InsuranceForm = (props) => {
       document: null,
     },
   ]);
+
+  const formatDate = (date) => {
+    if (!date) return "";
+    return new Date(date).toISOString().split("T")[0];
+  };
+
+  const handleSubmit = async () => {
+    try {
+      if (!props.userId) return;
+
+      const item = records[0];
+
+      const formData = new FormData();
+
+      formData.append("user_id", props.userId);
+      formData.append("year", item.year || "");
+      formData.append("entry_date", formatDate(item.date));
+      formData.append("amount", item.amount || "");
+
+      if (item.document) {
+        formData.append("group_insurance_cert", item.document);
+      }
+
+      // 🔥 DEBUG
+      for (let pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
+      }
+
+      await saveGroupInsurance(formData);
+
+      props.onNext();
+    } catch (err) {
+      console.error("Insurance API Error:", err.response?.data || err);
+    }
+  };
 
   const handleChange = (i, field, value) => {
     const data = [...records];
@@ -45,17 +80,20 @@ const InsuranceForm = (props) => {
   };
 
   return (
-    <EmployeeFormCard title="गटविमा माहिती" {...props}>
+    <EmployeeFormCard
+      title="गटविमा माहिती"
+      onNext={handleSubmit}
+      onPrev={props.onPrev}
+      onCancel={props.onCancel}
+      isFirst={props.isFirst}
+      isLast={props.isLast}
+    >
       <div className="space-y-6">
-
         {records.map((r, i) => (
           <div key={i} className="space-y-4">
-
             {records.length > 1 && (
               <div className="flex justify-between">
-                <h3 className="text-sm font-semibold">
-                  रेकॉर्ड {i + 1}
-                </h3>
+                <h3 className="text-sm font-semibold">रेकॉर्ड {i + 1}</h3>
                 <button
                   onClick={() => removeRow(i)}
                   className="text-red-500 text-xs"
@@ -66,7 +104,6 @@ const InsuranceForm = (props) => {
             )}
 
             <div className="grid grid-cols-2 gap-4">
-
               <Input
                 label="गटविमा वर्ष"
                 value={r.year}
@@ -95,7 +132,6 @@ const InsuranceForm = (props) => {
                   onChange={(e) => handleFile(i, e.target.files[0])}
                 />
               </div>
-
             </div>
           </div>
         ))}
@@ -103,7 +139,6 @@ const InsuranceForm = (props) => {
         <button onClick={addRow} className="btn-primary">
           + रेकॉर्ड जोडा
         </button>
-
       </div>
     </EmployeeFormCard>
   );

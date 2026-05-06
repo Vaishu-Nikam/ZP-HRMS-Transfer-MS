@@ -2,139 +2,114 @@ import { useState } from "react";
 import EmployeeFormCard from "../../../../../components/employee/layout/EmployeeFormCard";
 import { Input } from "../../../../../components/common/Input";
 import DatePicker from "../../../../../components/common/DatePicker";
+import { saveStep8 } from "../../../../../services/employeeService";
 
-const EmergencyContactForm = ({
-  onNext,
-  onPrev,
-  onCancel,
-  isFirst,
-  isLast,
-}) => {
+const EmergencyContactForm = ({ onNext, onPrev, onCancel, isFirst, isLast, userId }) => {
+
   const [formData, setFormData] = useState({
-    address: "",
-    contactName: "",
+    contact_name: "",
     relation: "",
     mobile: "",
-    altContactName: "",
-    altMobile: "",
-    stdCode: "",
-    phone: "",
-    homeStdCode: "",
-    homePhone: "",
-    stayFromDate: "",
+    alt_contact_name: "",
+    alt_mobile: "",
+    std_code: "",
+    phone_number: "",
+    home_std_code: "",
+    home_phone_number: "",
+    residing_since: "",
   });
 
-  const handleChange = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleNext = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      await saveStep8({
+        user_id:           userId,
+        contact_name:      formData.contact_name,
+        relation:          formData.relation,
+        mobile:            formData.mobile,
+        alt_contact_name:  formData.alt_contact_name,
+        alt_mobile:        formData.alt_mobile,
+        std_code:          formData.std_code,
+        phone_number:      formData.phone_number,
+        home_std_code:     formData.home_std_code,
+        home_phone_number: formData.home_phone_number,
+        residing_since:    formData.residing_since,
+      });
+      onNext();
+    } catch (err) {
+      setError(err?.response?.data?.message || "काहीतरी चूक झाली. पुन्हा प्रयत्न करा.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <EmployeeFormCard
       title="आपत्कालीन संपर्काचा पत्ता"
-      onNext={onNext}
+      onNext={handleNext}
       onPrev={onPrev}
       onCancel={onCancel}
       isFirst={isFirst}
       isLast={isLast}
+      loading={loading}
     >
-      <div className="grid grid-cols-2 gap-4">
-
-        {/* पत्ता */}
-        <div className="col-span-2">
-          <Input
-            label="पत्ता"
-            placeholder="पूर्ण पत्ता लिहा"
-            value={formData.address}
-            onChange={(e) => handleChange("address", e.target.value)}
-          />
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-300 text-red-700 rounded text-sm">
+          {error}
         </div>
+      )}
 
-        {/* संपर्क व्यक्ती */}
-        <Input
-          label="संपर्क व्यक्तीचे नाव"
-          placeholder="Enter Name"
-          value={formData.contactName}
-          onChange={(e) => handleChange("contactName", e.target.value)}
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
 
-        {/* नाते */}
-        <Input
-          label="नाते"
-          placeholder="Enter Relation"
-          value={formData.relation}
-          onChange={(e) => handleChange("relation", e.target.value)}
-        />
+        <Input label="संपर्क व्यक्तीचे नाव" name="contact_name"
+          placeholder="उदा. Abhi Kute"
+          value={formData.contact_name} onChange={handleChange} />
 
-        {/* मोबाईल */}
-        <Input
-          label="मोबाईल नंबर"
-          placeholder="Enter Mobile Number"
-          value={formData.mobile}
-          onChange={(e) => handleChange("mobile", e.target.value)}
-        />
+        <Input label="नाते" name="relation"
+          placeholder="उदा. brother"
+          value={formData.relation} onChange={handleChange} />
 
-        {/* पर्यायी संपर्क */}
-        <Input
-          label="पर्यायी संपर्क व्यक्तीचे नाव"
-          placeholder="Enter Alternate Name"
-          value={formData.altContactName}
-          onChange={(e) =>
-            handleChange("altContactName", e.target.value)
-          }
-        />
+        <Input label="मोबाईल नंबर" name="mobile"
+          placeholder="उदा. 9876543210"
+          value={formData.mobile} onChange={handleChange} />
 
-        {/* पर्यायी मोबाईल */}
-        <Input
-          label="पर्यायी व्यक्तीचा मोबाईल नंबर"
-          placeholder="Enter Alternate Mobile"
-          value={formData.altMobile}
-          onChange={(e) => handleChange("altMobile", e.target.value)}
-        />
+        <Input label="पर्यायी संपर्क व्यक्तीचे नाव" name="alt_contact_name"
+          placeholder="उदा. Sam"
+          value={formData.alt_contact_name} onChange={handleChange} />
 
-        {/* STD Code */}
-        <Input
-          label="दूरध्वनी एसटीडी कोड"
-          placeholder="Enter STD Code"
-          value={formData.stdCode}
-          onChange={(e) => handleChange("stdCode", e.target.value)}
-        />
+        <Input label="पर्यायी व्यक्तीचा मोबाईल नंबर" name="alt_mobile"
+          placeholder="उदा. 8237637370"
+          value={formData.alt_mobile} onChange={handleChange} />
 
-        {/* दूरध्वनी */}
-        <Input
-          label="दूरध्वनी क्रमांक"
-          placeholder="Enter Telephone Number"
-          value={formData.phone}
-          onChange={(e) => handleChange("phone", e.target.value)}
-        />
+        <Input label="दूरध्वनी एसटीडी कोड" name="std_code"
+          placeholder="उदा. 240"
+          value={formData.std_code} onChange={handleChange} />
 
-        {/* घरचा STD */}
-        <Input
-          label="घरचा दूरध्वनी एसटीडी कोड"
-          placeholder="Enter Home STD Code"
-          value={formData.homeStdCode}
-          onChange={(e) =>
-            handleChange("homeStdCode", e.target.value)
-          }
-        />
+        <Input label="दूरध्वनी क्रमांक" name="phone_number"
+          placeholder="उदा. 78466226"
+          value={formData.phone_number} onChange={handleChange} />
 
-        {/* घरचा फोन */}
-        <Input
-          label="घरचा दूरध्वनी क्रमांक"
-          placeholder="Enter Home Telephone"
-          value={formData.homePhone}
-          onChange={(e) =>
-            handleChange("homePhone", e.target.value)
-          }
-        />
+        <Input label="घरचा दूरध्वनी एसटीडी कोड" name="home_std_code"
+          placeholder="उदा. 124"
+          value={formData.home_std_code} onChange={handleChange} />
 
-        {/* तारीख */}
+        <Input label="घरचा दूरध्वनी क्रमांक" name="home_phone_number"
+          placeholder="उदा. 875593888"
+          value={formData.home_phone_number} onChange={handleChange} />
+
         <DatePicker
           label="ज्या दिनांकापासून कर्मचारी तेथे राहत आहे"
-          value={formData.stayFromDate}
-          onChange={(val) => handleChange("stayFromDate", val)}
+          value={formData.residing_since}
+          onChange={(val) => setFormData((prev) => ({ ...prev, residing_since: val }))}
           placeholder="dd/MM/yyyy"
         />
 

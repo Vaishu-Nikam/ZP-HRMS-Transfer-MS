@@ -39,11 +39,6 @@ userId,
   setLoading(true);
   setError(null);
 
-  if (!userId) {
-    setError("User ID मिळाला नाही");
-    setLoading(false);
-    return;
-  }
 
   try {
     const payload = {

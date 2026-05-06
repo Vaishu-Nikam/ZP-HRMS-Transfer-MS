@@ -3,8 +3,16 @@ import EmployeeFormCard from "../../../../../components/employee/layout/Employee
 import DatePicker from "../../../../../components/common/DatePicker";
 import { Input } from "../../../../../components/common/Input";
 import DropdownSearch from "../../../../../components/common/DropdownSearch";
+import { saveDiscussionStep3 } from "../../../../../services/employeeService";
 
-const SuspensionForm = (props) => {
+const SuspensionForm = ({
+  onNext,
+  onPrev,
+  onCancel,
+  isFirst,
+  isLast,
+  userId,
+}) => {
 
   const [records, setRecords] = useState([
     {
@@ -30,6 +38,12 @@ const SuspensionForm = (props) => {
     { id: "नाही", name: "नाही" },
   ];
 
+  const formatDate = (date) => {
+    if (!date) return "";
+    const d = new Date(date);
+    return d.toISOString().split("T")[0];
+  };
+
   const handleChange = (i, field, value) => {
     const data = [...records];
     data[i][field] = value;
@@ -44,29 +58,75 @@ const SuspensionForm = (props) => {
     handleChange(i, "document", file);
   };
 
+  // ✅ SUBMIT (API Integration)
+  const handleSubmit = async () => {
+    try {
+      if (!userId) {
+        alert("User ID missing");
+        return;
+      }
+
+      for (let item of records) {
+
+        if (!item.isSuspended) {
+          alert("सर्व माहिती भरा");
+          return;
+        }
+
+        const formData = new FormData();
+
+        formData.append("user_id", userId);
+        formData.append(
+          "was_suspended",
+          item.isSuspended === "होय" ? "true" : "false"
+        );
+        formData.append("suspension_date", formatDate(item.suspensionDate));
+        formData.append("suspension_duration", item.period);
+        formData.append("suspension_reason", item.reason);
+        formData.append(
+          "criminal_case_filed",
+          item.isCriminalCase === "होय" ? "true" : "false"
+        );
+        formData.append("subsistence_allowance_pct", item.allowance);
+        formData.append("disciplinary_action_date", formatDate(item.disciplineDate));
+        formData.append("inquiry_officer_date", formatDate(item.enquiryOfficerDate));
+        formData.append("reinstatement_order_date", formatDate(item.reinstatementOrderDate));
+        formData.append("reinstatement_joining_date", formatDate(item.joinDate));
+        formData.append("suspension_period_decision", item.suspensionDecision);
+        formData.append("order_number", item.orderNo);
+        formData.append("order_date", formatDate(item.orderDate));
+
+        if (item.document) {
+          formData.append("order_cert", item.document);
+        }
+
+        console.log("FORMDATA:", [...formData]);
+
+        await saveDiscussionStep3(formData);
+      }
+
+      onNext();
+
+    } catch (err) {
+      console.log("ERROR:", err);
+      alert(err.response?.data?.message || "API Error");
+    }
+  };
+
   return (
-    <EmployeeFormCard title="निलंबन माहिती" {...props}>
+    <EmployeeFormCard
+      title="निलंबन माहिती"
+      onNext={handleSubmit}
+      onPrev={onPrev}
+      onCancel={onCancel}
+      isFirst={isFirst}
+      isLast={isLast}
+    >
       <div className="space-y-6">
 
         {records.map((r, i) => (
           <div key={i} className="space-y-4">
 
-            {/* Header */}
-            {records.length > 1 && (
-              <div className="flex justify-between">
-                <h3 className="text-sm font-semibold">
-                  रेकॉर्ड {i + 1}
-                </h3>
-                <button
-                  onClick={() => setRecords(records.filter((_, idx) => idx !== i))}
-                  className="text-red-500 text-xs"
-                >
-                  हटवा
-                </button>
-              </div>
-            )}
-
-            {/* Form Grid */}
             <div className="grid grid-cols-2 gap-4">
 
               <div>
@@ -89,12 +149,14 @@ const SuspensionForm = (props) => {
 
               <Input
                 label="निलंबन कालावधी"
+                placeholder="उदा. 3 महिने"
                 value={r.period}
                 onChange={(e) => handleChange(i, "period", e.target.value)}
               />
 
               <Input
                 label="निलंबनाचे कारण"
+                placeholder="कारण लिहा"
                 value={r.reason}
                 onChange={(e) => handleChange(i, "reason", e.target.value)}
               />
@@ -113,6 +175,7 @@ const SuspensionForm = (props) => {
 
               <Input
                 label="निर्वाह भत्ता (%)"
+                placeholder="उदा. 70"
                 value={r.allowance}
                 onChange={(e) => handleChange(i, "allowance", e.target.value)}
               />
@@ -143,12 +206,14 @@ const SuspensionForm = (props) => {
 
               <Input
                 label="निलंबन निर्णय"
+                placeholder="Suspend / Reinstate"
                 value={r.suspensionDecision}
                 onChange={(e) => handleChange(i, "suspensionDecision", e.target.value)}
               />
 
               <Input
                 label="आदेश क्रमांक"
+                placeholder="उदा. 12345"
                 value={r.orderNo}
                 onChange={(e) => handleChange(i, "orderNo", e.target.value)}
               />

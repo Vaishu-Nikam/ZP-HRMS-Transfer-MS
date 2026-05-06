@@ -1,11 +1,8 @@
 // src/pages/roster/RosterEntry.jsx
 import React, { useEffect, useState, useMemo } from 'react';
-import { UserCheck, Save } from 'lucide-react';
+import { UserCheck, Save, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const ROSTER_CATEGORIES = ['Open', 'SC', 'ST', 'OBC', 'NT-A', 'NT-B', 'NT-C', 'NT-D', 'SBC'];
-
-// 100-point pattern मधून category नुसार available points
 const ROSTER_100 = Array.from({ length: 100 }, (_, i) => i + 1);
 
 const POINT_CATEGORY = {
@@ -21,13 +18,25 @@ const POINT_CATEGORY = {
   91:'ST',92:'Open',93:'OBC',94:'Open',95:'SC',96:'Open',97:'Open',98:'NT-D',99:'Open',100:'SC',
 };
 
-const RosterEntry = () => {
-  const [employees,   setEmployees]   = useState([]);
-  const [rosterData,  setRosterData]  = useState({});
-  const [departments, setDepartments] = useState([]);
-  const [designations,setDesignations]= useState([]);
+const CAT_BADGE = {
+  Open:  'bg-blue-100 text-blue-800',
+  SC:    'bg-purple-100 text-purple-800',
+  ST:    'bg-green-100 text-green-800',
+  OBC:   'bg-amber-100 text-amber-800',
+  'NT-A':'bg-pink-100 text-pink-800',
+  'NT-B':'bg-rose-100 text-rose-800',
+  'NT-C':'bg-red-100 text-red-800',
+  'NT-D':'bg-yellow-100 text-yellow-800',
+  SBC:   'bg-teal-100 text-teal-800',
+};
 
-  // Form state
+const inputCls = `w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 transition-all`;
+
+const RosterEntry = () => {
+  const [employees,    setEmployees]    = useState([]);
+  const [rosterData,   setRosterData]   = useState({});
+  const [departments,  setDepartments]  = useState([]);
+
   const [selectedPoint,    setSelectedPoint]    = useState('');
   const [selectedEmployee, setSelectedEmployee] = useState('');
   const [joiningDate,      setJoiningDate]      = useState('');
@@ -37,17 +46,13 @@ const RosterEntry = () => {
     setEmployees(JSON.parse(localStorage.getItem('employees')) || []);
     setRosterData(JSON.parse(localStorage.getItem('roster_data')) || {});
     setDepartments(JSON.parse(localStorage.getItem('departments')) || []);
-    setDesignations(JSON.parse(localStorage.getItem('designations')) || []);
   }, []);
 
-  // Point नुसार category
   const pointCategory = selectedPoint ? POINT_CATEGORY[Number(selectedPoint)] : '';
 
-  // Category नुसार eligible employees filter
   const eligibleEmployees = useMemo(() => {
     let list = employees;
     if (filterDept) list = list.filter(e => e.department_id === filterDept);
-    // Category match
     if (pointCategory && pointCategory !== 'Open') {
       list = list.filter(e => {
         const cat = e.category || '';
@@ -57,7 +62,6 @@ const RosterEntry = () => {
     return list;
   }, [employees, pointCategory, filterDept]);
 
-  // Vacant points
   const vacantPoints = ROSTER_100.filter(p => !rosterData[p]?.employee_id);
 
   const handleSave = () => {
@@ -82,10 +86,7 @@ const RosterEntry = () => {
 
     localStorage.setItem('roster_data', JSON.stringify(updated));
     setRosterData(updated);
-
     toast.success(`गुण ${selectedPoint} वर ${emp.first_name} ${emp.last_name} यांची नोंद झाली! ✅`);
-
-    // Reset
     setSelectedPoint('');
     setSelectedEmployee('');
     setJoiningDate('');
@@ -99,44 +100,50 @@ const RosterEntry = () => {
     toast.success(`गुण ${point} रिक्त केला`);
   };
 
-  const inputCls = `w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white`;
+  const filledEntries = Object.entries(rosterData).sort(([a], [b]) => Number(a) - Number(b));
 
   return (
     <div className="space-y-6">
 
-      {/* Entry Form */}
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <UserCheck className="w-5 h-5 text-blue-600" />
-          <h3 className="font-semibold text-gray-800">नवीन रोस्टर नोंद</h3>
+      {/* ── Entry Form ── */}
+      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-5">
+        <div className="flex items-center gap-2 mb-5">
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <UserCheck className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-800 text-sm">नवीन रोस्टर नोंद</h3>
+            <p className="text-xs text-gray-500">खाली माहिती भरून Save करा</p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
-          {/* Point Number */}
+          {/* Point */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5">
               गुण क्रमांक <span className="text-red-500">*</span>
             </label>
-            <select className={inputCls} value={selectedPoint}
-              onChange={e => { setSelectedPoint(e.target.value); setSelectedEmployee(''); }}>
-              <option value="">निवडा</option>
+            <select
+              className={inputCls}
+              value={selectedPoint}
+              onChange={e => { setSelectedPoint(e.target.value); setSelectedEmployee(''); }}
+            >
+              <option value="">निवडा...</option>
               {vacantPoints.map(p => (
-                <option key={p} value={p}>
-                  {p} - {POINT_CATEGORY[p]}
-                </option>
+                <option key={p} value={p}>{p} — {POINT_CATEGORY[p]}</option>
               ))}
             </select>
             {pointCategory && (
-              <p className="text-xs text-blue-600 mt-1">
-                या गुणासाठी प्रवर्ग: <strong>{pointCategory}</strong>
+              <p className="text-[11px] text-blue-600 mt-1.5 font-medium">
+                प्रवर्ग: <span className="font-bold">{pointCategory}</span>
               </p>
             )}
           </div>
 
-          {/* Department Filter */}
+          {/* Dept filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">विभाग फिल्टर</label>
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5">विभाग फिल्टर</label>
             <select className={inputCls} value={filterDept} onChange={e => setFilterDept(e.target.value)}>
               <option value="">सर्व विभाग</option>
               {departments.map(d => (
@@ -145,41 +152,47 @@ const RosterEntry = () => {
             </select>
           </div>
 
-          {/* Employee Select */}
+          {/* Employee */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5">
               कर्मचारी <span className="text-red-500">*</span>
             </label>
-            <select className={inputCls} value={selectedEmployee}
+            <select
+              className={`${inputCls} ${!selectedPoint ? 'opacity-50 cursor-not-allowed' : ''}`}
+              value={selectedEmployee}
               onChange={e => setSelectedEmployee(e.target.value)}
-              disabled={!selectedPoint}>
-              <option value="">कर्मचारी निवडा</option>
+              disabled={!selectedPoint}
+            >
+              <option value="">कर्मचारी निवडा...</option>
               {eligibleEmployees.map(e => (
                 <option key={e.employee_id} value={e.employee_id}>
-                  {e.employee_code} - {e.first_name} {e.last_name} ({e.category || 'Open'})
+                  {e.employee_code} — {e.first_name} {e.last_name} ({e.category || 'Open'})
                 </option>
               ))}
             </select>
             {selectedPoint && eligibleEmployees.length === 0 && (
-              <p className="text-xs text-red-500 mt-1">या प्रवर्गात कोणतेही कर्मचारी नाहीत</p>
+              <p className="text-[11px] text-red-500 mt-1.5">या प्रवर्गात कोणतेही कर्मचारी नाहीत</p>
             )}
           </div>
 
-          {/* Joining Date */}
+          {/* Date */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5">
               रुजू दिनांक <span className="text-red-500">*</span>
             </label>
-            <input type="date" className={inputCls} value={joiningDate}
-              onChange={e => setJoiningDate(e.target.value)} />
+            <input
+              type="date"
+              className={inputCls}
+              value={joiningDate}
+              onChange={e => setJoiningDate(e.target.value)}
+            />
           </div>
-
         </div>
 
-        <div className="flex justify-end mt-4">
+        <div className="flex justify-end mt-5">
           <button
             onClick={handleSave}
-            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-all"
+            className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold shadow-sm hover:shadow-md transition-all"
           >
             <Save className="w-4 h-4" />
             रोस्टर नोंद Save करा
@@ -187,57 +200,69 @@ const RosterEntry = () => {
         </div>
       </div>
 
-      {/* Filled Roster Entries */}
-      {Object.keys(rosterData).length > 0 && (
+      {/* ── Filled entries table ── */}
+      {filledEntries.length > 0 && (
         <div>
-          <h3 className="font-semibold text-gray-800 mb-3">
-            भरलेल्या नोंदी ({Object.keys(rosterData).length})
-          </h3>
-          <div className="overflow-x-auto rounded-xl border border-gray-200">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-gray-800 text-sm">
+              भरलेल्या नोंदी
+              <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+                {filledEntries.length}
+              </span>
+            </h3>
+          </div>
+
+          <div className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-slate-800 text-white">
-                  <th className="px-4 py-3 text-left font-medium">गुण क्र.</th>
-                  <th className="px-4 py-3 text-left font-medium">प्रवर्ग</th>
-                  <th className="px-4 py-3 text-left font-medium">कर्मचारी नाव</th>
-                  <th className="px-4 py-3 text-left font-medium">कोड</th>
-                  <th className="px-4 py-3 text-left font-medium">रुजू दिनांक</th>
-                  <th className="px-4 py-3 text-center font-medium">काढा</th>
+                <tr className="bg-slate-900 text-white">
+                  {['गुण क्र.','प्रवर्ग','कर्मचारी नाव','कोड','रुजू दिनांक','काढा'].map(h => (
+                    <th key={h} className="px-4 py-3 text-left text-xs font-medium tracking-wide last:text-center">{h}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {Object.entries(rosterData)
-                  .sort(([a], [b]) => Number(a) - Number(b))
-                  .map(([point, entry], idx) => (
-                    <tr key={point}
-                      className={`border-b border-gray-100 hover:bg-red-50 transition-colors
-                        ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/40'}`}>
-                      <td className="px-4 py-2.5 font-bold text-gray-700">{point}</td>
-                      <td className="px-4 py-2.5">
-                        <span className="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700">
-                          {POINT_CATEGORY[Number(point)]}
-                        </span>
-                      </td>
-                      <td className="px-4 py-2.5 text-gray-800">{entry.employee_name}</td>
-                      <td className="px-4 py-2.5 font-mono text-xs text-gray-600">{entry.employee_code}</td>
-                      <td className="px-4 py-2.5 text-gray-600 text-xs">
-                        {entry.joining_date
-                          ? new Date(entry.joining_date).toLocaleDateString('mr-IN')
-                          : '-'}
-                      </td>
-                      <td className="px-4 py-2.5 text-center">
-                        <button
-                          onClick={() => handleRemove(point)}
-                          className="text-xs text-red-500 hover:text-red-700 border border-red-200 px-2 py-1 rounded hover:bg-red-50 transition-all"
-                        >
-                          काढा
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                {filledEntries.map(([point, entry], idx) => (
+                  <tr
+                    key={point}
+                    className={`border-b border-gray-50 hover:bg-red-50/30 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'}`}
+                  >
+                    <td className="px-4 py-2.5 font-bold text-gray-800">{point}</td>
+                    <td className="px-4 py-2.5">
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${CAT_BADGE[POINT_CATEGORY[Number(point)]]}`}>
+                        {POINT_CATEGORY[Number(point)]}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2.5 text-gray-700">{entry.employee_name}</td>
+                    <td className="px-4 py-2.5 font-mono text-xs text-gray-400">{entry.employee_code}</td>
+                    <td className="px-4 py-2.5 text-xs text-gray-400">
+                      {entry.joining_date
+                        ? new Date(entry.joining_date).toLocaleDateString('mr-IN')
+                        : '—'}
+                    </td>
+                    <td className="px-4 py-2.5 text-center">
+                      <button
+                        onClick={() => handleRemove(point)}
+                        className="inline-flex items-center gap-1 text-xs text-red-500 hover:text-red-700 border border-red-100 hover:border-red-300 px-2.5 py-1 rounded-lg hover:bg-red-50 transition-all"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        काढा
+                      </button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {filledEntries.length === 0 && (
+        <div className="text-center py-12 bg-white border border-dashed border-gray-200 rounded-xl">
+          <UserCheck className="w-10 h-10 text-gray-200 mx-auto mb-3" />
+          <p className="text-gray-400 text-sm">अजून कोणतीही नोंद नाही</p>
+          <p className="text-gray-300 text-xs mt-1">वर गुण निवडून नोंद करा</p>
         </div>
       )}
     </div>

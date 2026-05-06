@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import EmployeeFormCard from "../../../../../components/employee/layout/EmployeeFormCard";
 import DropdownSearch from "../../../../../components/common/DropdownSearch";
 import FileUpload from "../../../../../components/common/FileUpload";
-import { saveStep5 } from "../../../../../services/employeeService";
+import { saveStep5, getMaritalStatuses } from "../../../../../services/employeeService";
 
 const PersonalPart5Form = ({
   onNext,
@@ -10,19 +10,20 @@ const PersonalPart5Form = ({
   onCancel,
   isFirst,
   isLast,
-  userId = 5,
+  userId,
 }) => {
 
   const [formData, setFormData] = useState({
-    marital_status: "",      
-    marriage_cert: null,      
-    birth_cert: null,        
-    aadhar: null,            
-    pan: null,                
-    caste_validity: null,     
+    marital_status: "",
+    marriage_cert: null,
+    birth_cert: null,
+    aadhar: null,
+    pan: null,
+    caste_validity: null,
     gazette_name_change: null,
   });
 
+  const [maritalOptions, setMaritalOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -31,16 +32,27 @@ const PersonalPart5Form = ({
     if (error) setError(null);
   };
 
-  // ids match the numeric enum the API expects for marital_status
-  const maritalOptions = [
-    { id: "1", name: "विवाहित" },
-    { id: "2", name: "अविवाहित" },
-    { id: "3", name: "विधवा" },
-    { id: "4", name: "विधुर" },
-    { id: "5", name: "देवदासी" },
-  ];
+  // ✅ API dropdown fetch
+  useEffect(() => {
+    const fetchMaritalStatus = async () => {
+      try {
+        const data = await getMaritalStatuses();
 
-  // ─── Submit — multipart/form-data ─────────────────────────────────────────
+        const options = data.map((item) => ({
+          id: String(item.id),
+          name: item.name,
+        }));
+
+        setMaritalOptions(options);
+      } catch (err) {
+        console.error("Marital Status API Error:", err);
+      }
+    };
+
+    fetchMaritalStatus();
+  }, []);
+
+  // ✅ Submit
   const handleSubmit = async () => {
     setLoading(true);
     setError(null);
@@ -48,17 +60,25 @@ const PersonalPart5Form = ({
     try {
       const payload = new FormData();
       payload.append("user_id", String(userId));
-      payload.append("marital_status",     formData.marital_status);
+      payload.append("marital_status", formData.marital_status);
 
-      // Only append files if the user selected them
-      if (formData.marriage_cert)       payload.append("marriage_cert",       formData.marriage_cert);
-      if (formData.birth_cert)          payload.append("birth_cert",          formData.birth_cert);
-      if (formData.aadhar)              payload.append("aadhar",              formData.aadhar);
-      if (formData.pan)                 payload.append("pan",                 formData.pan);
-      if (formData.caste_validity)      payload.append("caste_validity",      formData.caste_validity);
-      if (formData.gazette_name_change) payload.append("gazette_name_change", formData.gazette_name_change);
+      if (formData.marriage_cert)
+        payload.append("marriage_cert", formData.marriage_cert);
 
-      console.log("STEP 5 PAYLOAD:", Object.fromEntries(payload.entries()));
+      if (formData.birth_cert)
+        payload.append("birth_cert", formData.birth_cert);
+
+      if (formData.aadhar)
+        payload.append("aadhar", formData.aadhar);
+
+      if (formData.pan)
+        payload.append("pan", formData.pan);
+
+      if (formData.caste_validity)
+        payload.append("caste_validity", formData.caste_validity);
+
+      if (formData.gazette_name_change)
+        payload.append("gazette_name_change", formData.gazette_name_change);
 
       const res = await saveStep5(payload);
 
@@ -70,6 +90,7 @@ const PersonalPart5Form = ({
         err.response?.data?.error ||
         err.message ||
         "काहीतरी चूक झाली. पुन्हा प्रयत्न करा.";
+
       console.error("STEP 5 ERROR:", err.response?.data || err.message);
       setError(message);
     } finally {

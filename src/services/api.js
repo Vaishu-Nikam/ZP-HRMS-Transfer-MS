@@ -1,7 +1,7 @@
 import axios from "axios";
-
+import { API_BASE_PATH } from "../config/appConfig";
 const api = axios.create({
-  baseURL: "https://zproster.thecanatech.com/api",
+  baseURL: API_BASE_PATH,
   headers: {
     "Content-Type": "application/json",
   },
