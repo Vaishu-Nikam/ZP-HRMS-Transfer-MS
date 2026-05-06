@@ -3,6 +3,7 @@ import EmployeeFormCard from "../../../../../components/employee/layout/Employee
 import DatePicker from "../../../../../components/common/DatePicker";
 import { Input } from "../../../../../components/common/Input";
 import DropdownSearch from "../../../../../components/common/DropdownSearch";
+import { savePromotionStep1 } from "../../../../../services/employeeService";
 
 const PromotionForm = (props) => {
 
@@ -23,6 +24,54 @@ const PromotionForm = (props) => {
       endDate: "",
     },
   ]);
+
+  const formatDate = (date) => {
+  if (!date) return "";
+  return new Date(date).toISOString().split("T")[0];
+};
+
+const handleSubmit = async () => {
+  try {
+    if (!props.userId) return;
+
+    const item = records[0];
+
+    const payload = {
+      user_id: Number(props.userId),
+
+      promotion_type: item.type,
+      promotion_category: item.category,
+      order_date: formatDate(item.orderDate),
+
+      is_current_posting:
+        item.isCurrentPost === "होय" ? "yes" : "no",
+
+      is_district_transfer:
+        item.isDistrictTransfer === "होय" ? "yes" : "no",
+
+      posting_location_type: item.postingPlace,
+      panchayat_samiti: item.panchayat,
+      dept_level: item.level,
+      office_name: item.office,
+      post_name: item.designation,
+
+      is_gazetted:
+        item.isGazetted === "होय" ? "yes" : "no",
+
+      joining_date: formatDate(item.joinDate),
+      end_date: formatDate(item.endDate),
+    };
+
+    console.log("PROMOTION PAYLOAD:", payload);
+
+    await savePromotionStep1(payload);
+
+    props.onNext();
+
+  } catch (err) {
+    console.error("Promotion API Error:", err.response?.data || err);
+  }
+};
 
   const yesNo = [
     { id: "होय", name: "होय" },
@@ -72,7 +121,14 @@ const PromotionForm = (props) => {
   };
 
   return (
-    <EmployeeFormCard title="पदोन्नती माहिती" {...props}>
+   <EmployeeFormCard
+  title="पदोन्नती माहिती"
+  onNext={handleSubmit}
+  onPrev={props.onPrev}
+  onCancel={props.onCancel}
+  isFirst={props.isFirst}
+  isLast={props.isLast}
+>
       <div className="space-y-6">
 
         {records.map((r, i) => (

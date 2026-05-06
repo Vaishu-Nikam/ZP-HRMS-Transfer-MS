@@ -3,6 +3,7 @@ import EmployeeFormCard from "../../../../../components/employee/layout/Employee
 import DatePicker from "../../../../../components/common/DatePicker";
 import { Input } from "../../../../../components/common/Input";
 import DropdownSearch from "../../../../../components/common/DropdownSearch";
+import { saveTransferStep1 } from "../../../../../services/employeeService";
 
 const TransferForm = (props) => {
 
@@ -76,14 +77,97 @@ const TransferForm = (props) => {
     setRecords(records.filter((_, index) => index !== i));
   };
 
+  // ✅ DATE FORMAT
+  const formatDate = (date) => {
+    if (!date) return "";
+    return new Date(date).toISOString().split("T")[0];
+  };
+
+  // ✅ SUBMIT (MAIN LOGIC)
+  const handleSubmit = async () => {
+    console.log("🔥 TRANSFER STEP1 CLICK");
+
+    try {
+      if (!props.userId) {
+        alert("User ID missing");
+        return;
+      }
+
+      for (let item of records) {
+
+        // dropdown fix
+        const transferType =
+          typeof item.transferType === "object"
+            ? item.transferType.id
+            : item.transferType;
+
+        const currentPost =
+          typeof item.isCurrentPost === "object"
+            ? item.isCurrentPost.id
+            : item.isCurrentPost;
+
+        const districtTransfer =
+          typeof item.isDistrictTransfer === "object"
+            ? item.isDistrictTransfer.id
+            : item.isDistrictTransfer;
+
+        const gazetted =
+          typeof item.isGazetted === "object"
+            ? item.isGazetted.id
+            : item.isGazetted;
+
+        const level =
+          typeof item.level === "object"
+            ? item.level.id
+            : item.level;
+
+        // validation (basic)
+        if (!transferType || !item.category) {
+          alert("सर्व माहिती भरा");
+          return;
+        }
+
+        const payload = {
+          user_id: props.userId,
+          transfer_type: transferType,
+          transfer_category: item.category,
+          order_date: formatDate(item.orderDate),
+          is_current_posting: currentPost === "होय" ? "yes" : "no",
+          is_district_transfer: districtTransfer === "होय" ? "yes" : "no",
+          posting_location_type: item.postingPlace,
+          panchayat_samiti: item.panchayat,
+          dept_level: level,
+          office_name: item.office,
+          post_name: item.designation,
+          is_gazetted: gazetted === "होय" ? "yes" : "no",
+          joining_date: formatDate(item.joinDate),
+          end_date: formatDate(item.endDate),
+        };
+
+        console.log("🚀 PAYLOAD:", payload);
+
+        await saveTransferStep1(payload);
+      }
+
+      if (props.onNext) props.onNext();
+
+    } catch (err) {
+      console.log("❌ ERROR:", err.response?.data || err.message);
+      alert(err.response?.data?.message || "API Error");
+    }
+  };
+
   return (
-    <EmployeeFormCard title="बदली माहिती" {...props}>
+    <EmployeeFormCard
+      title="बदली माहिती"
+      {...props}
+      onNext={handleSubmit}   // 🔥 IMPORTANT
+    >
       <div className="space-y-6">
 
         {records.map((r, i) => (
           <div key={i} className="space-y-4">
 
-            {/* Header */}
             {records.length > 1 && (
               <div className="flex justify-between">
                 <h3 className="text-sm font-semibold">
@@ -98,7 +182,6 @@ const TransferForm = (props) => {
               </div>
             )}
 
-            {/* Form Grid */}
             <div className="grid grid-cols-2 gap-4">
 
               <div>

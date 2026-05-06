@@ -2,6 +2,7 @@ import { useState } from "react";
 import EmployeeFormCard from "../../../../../components/employee/layout/EmployeeFormCard";
 import { Input } from "../../../../../components/common/Input";
 import DatePicker from "../../../../../components/common/DatePicker";
+import { saveStep7 } from "../../../../../services/employeeService";
 
 const CurrentAddressForm = ({
   onNext,
@@ -9,140 +10,188 @@ const CurrentAddressForm = ({
   onCancel,
   isFirst,
   isLast,
+  userId,
+  permanentAddress,
 }) => {
-  const [formData, setFormData] = useState({
-    address: "",
-    postOffice: "",
+
+  const [current, setCurrent] = useState({
+    address_line: "",
+    post_office: "",
     city: "",
     district: "",
     taluka: "",
-    pincode: "",
+    pin_code: "",
     mobile: "",
-    stdCode: "",
-    phone: "",
-    govtQuarter: "",
-    stayFromDate: "",
+    std_code: "",
+    phone_number: "",
+    is_govt_residence: "",
+    residing_since: "",
   });
 
-  const handleChange = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+  const [sameAsPermanent, setSameAsPermanent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setCurrent((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // ✅ Checkbox — copy permanent → current
+  const handleSameAsPermanent = (e) => {
+    const checked = e.target.checked;
+    setSameAsPermanent(checked);
+    if (checked) setCurrent({ ...permanentAddress });
+    else setCurrent({
+      address_line: "", post_office: "", city: "", district: "",
+      taluka: "", pin_code: "", mobile: "", std_code: "",
+      phone_number: "", is_govt_residence: "", residing_since: "",
+    });
+  };
+
+  const formatDate = (date) => {
+  if (!date) return null;
+  const d = new Date(date);
+  return d.toISOString().split("T")[0]; // YYYY-MM-DD
+};
+
+  // ✅ API call — permanent + current एकत्र
+  const handleNext = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      const payload = {
+        user_id: userId,
+        permanent: {
+          address_line:      permanentAddress.address_line      || "",
+          post_office:       permanentAddress.post_office       || "",
+          city:              permanentAddress.city              || "",
+          district:          permanentAddress.district          || "",
+          taluka:            permanentAddress.taluka            || "",
+          pin_code:          Number(permanentAddress.pin_code)  || 0,
+          mobile:            Number(permanentAddress.mobile)    || 0,
+          std_code:          permanentAddress.std_code          || "",
+          phone_number:      permanentAddress.phone_number      || "",
+          is_govt_residence: permanentAddress.is_govt_residence === "true" ? "true" : "false",
+          residing_since: formatDate(permanentAddress.residing_since)
+        },
+        current: {
+          address_line:      current.address_line      || "",
+          post_office:       current.post_office       || "",
+          city:              current.city              || "",
+          district:          current.district          || "",
+          taluka:            current.taluka            || "",
+          pin_code:          Number(current.pin_code)  || 0,
+          mobile:            Number(current.mobile)    || 0,
+          std_code:          current.std_code          || "",
+          phone_number:      current.phone_number      || "",
+          is_govt_residence: current.is_govt_residence === "true" ? "true" : "false",
+          residing_since:    current.residing_since    || "",
+        },
+      };
+
+      await saveStep7(payload);
+      onNext();
+    } catch (err) {
+      const msg = err?.response?.data?.message || "काहीतरी चूक झाली. पुन्हा प्रयत्न करा.";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <EmployeeFormCard
       title="सध्याचा पत्ता"
-      onNext={onNext}
+      onNext={handleNext}
       onPrev={onPrev}
       onCancel={onCancel}
       isFirst={isFirst}
       isLast={isLast}
+      loading={loading}
     >
-      <div className="grid grid-cols-2 gap-4">
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-300 text-red-700 rounded text-sm">
+          {error}
+        </div>
+      )}
 
-        {/* पत्ता */}
-        <div className="col-span-2">
-          <Input
-            label="पत्ता"
+      {/* ✅ Same as permanent checkbox */}
+      <div className="mb-5 flex items-center gap-2">
+        <input
+          type="checkbox"
+          id="sameAsPermanent"
+          checked={sameAsPermanent}
+          onChange={handleSameAsPermanent}
+          className="w-4 h-4 accent-blue-600"
+        />
+        <label htmlFor="sameAsPermanent" className="text-sm text-slate-700 cursor-pointer">
+          कायमच्या पत्त्यासारखाच आहे
+        </label>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+
+        <div className="md:col-span-2">
+          <Input label="पत्ता" name="address_line"
             placeholder="पूर्ण पत्ता लिहा"
-            value={formData.address}
-            onChange={(e) => handleChange("address", e.target.value)}
-          />
+            value={current.address_line} onChange={handleChange} />
         </div>
 
-        {/* पोस्ट ऑफिस */}
-        <Input
-          label="पोस्ट ऑफिसचे नाव"
-          placeholder="Enter Post Office"
-          value={formData.postOffice}
-          onChange={(e) => handleChange("postOffice", e.target.value)}
-        />
+        <Input label="पोस्ट ऑफिसचे नाव" name="post_office"
+          placeholder="उदा. Nagar Post Office"
+          value={current.post_office} onChange={handleChange} />
 
-        {/* शहर */}
-        <Input
-          label="शहर"
-          placeholder="Enter City"
-          value={formData.city}
-          onChange={(e) => handleChange("city", e.target.value)}
-        />
+        <Input label="शहर" name="city"
+          placeholder="उदा. Ahilyanagar"
+          value={current.city} onChange={handleChange} />
 
-        {/* जिल्हा */}
-        <Input
-          label="जिल्हा"
-          placeholder="Enter District"
-          value={formData.district}
-          onChange={(e) => handleChange("district", e.target.value)}
-        />
+        <Input label="जिल्हा" name="district"
+          placeholder="उदा. Ahmednagar"
+          value={current.district} onChange={handleChange} />
 
-        {/* तालुका */}
-        <Input
-          label="तालुका"
-          placeholder="Enter Taluka"
-          value={formData.taluka}
-          onChange={(e) => handleChange("taluka", e.target.value)}
-        />
+        <Input label="तालुका" name="taluka"
+          placeholder="उदा. Nagar"
+          value={current.taluka} onChange={handleChange} />
 
-        {/* पिन कोड */}
-        <Input
-          label="पिन कोड"
-          placeholder="Enter Pincode"
-          value={formData.pincode}
-          onChange={(e) => handleChange("pincode", e.target.value)}
-        />
+        <Input label="पिन कोड" name="pin_code"
+          placeholder="उदा. 414001"
+          value={current.pin_code} onChange={handleChange} />
 
-        {/* मोबाईल */}
-        <Input
-          label="मोबाईल नंबर"
-          placeholder="Enter Mobile Number"
-          value={formData.mobile}
-          onChange={(e) => handleChange("mobile", e.target.value)}
-        />
+        <Input label="मोबाईल नंबर" name="mobile"
+          placeholder="उदा. 9876543210"
+          value={current.mobile} onChange={handleChange} />
 
-        {/* STD Code */}
-        <Input
-          label="दूरध्वनी एसटीडी कोड"
-          placeholder="Enter STD Code"
-          value={formData.stdCode}
-          onChange={(e) => handleChange("stdCode", e.target.value)}
-        />
+        <Input label="दूरध्वनी एसटीडी कोड" name="std_code"
+          placeholder="उदा. +91"
+          value={current.std_code} onChange={handleChange} />
 
-        {/* दूरध्वनी */}
-        <Input
-          label="दूरध्वनी क्रमांक"
-          placeholder="Enter Telephone Number"
-          value={formData.phone}
-          onChange={(e) => handleChange("phone", e.target.value)}
-        />
+        <Input label="दूरध्वनी क्रमांक" name="phone_number"
+          placeholder="उदा. 254961447"
+          value={current.phone_number} onChange={handleChange} />
 
-        {/* शासकीय निवासस्थान */}
         <div>
-          <label className="text-sm font-medium">
+          <label className="block text-sm font-medium text-slate-700 mb-1">
             शासकीय निवासस्थान आहे का?
           </label>
           <select
-            className="input mt-1"
-            value={formData.govtQuarter}
-            onChange={(e) =>
-              handleChange("govtQuarter", e.target.value)
-            }
+            name="is_govt_residence"
+            value={current.is_govt_residence}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">निवडा</option>
-            <option>होय</option>
-            <option>नाही</option>
+            <option value="true">होय</option>
+            <option value="false">नाही</option>
           </select>
         </div>
 
-        {/* राहण्याची तारीख */}
-        {formData.govtQuarter === "होय" && (
-          <DatePicker
-            label="ज्या दिनांकापासून कर्मचारी तेथे राहत आहे"
-            value={formData.stayFromDate}
-            onChange={(val) => handleChange("stayFromDate", val)}
-            placeholder="dd/MM/yyyy"
-          />
-        )}
+     <DatePicker
+  label="ज्या दिनांकापासून राहत आहे"
+  value={current.residing_since}
+  onChange={(val) => setCurrent((prev) => ({ ...prev, residing_since: val }))}
+  placeholder="dd/MM/yyyy"
+/>
 
       </div>
     </EmployeeFormCard>

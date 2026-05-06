@@ -1,12 +1,11 @@
-
 import { useState } from "react";
 import EmployeeFormCard from "../../../../../components/employee/layout/EmployeeFormCard";
 import DatePicker from "../../../../../components/common/DatePicker";
 import { Input } from "../../../../../components/common/Input";
 import DropdownSearch from "../../../../../components/common/DropdownSearch";
+import { saveServiceExtension } from "../../../../../services/employeeService";
 
 const ExtensionForm = (props) => {
-
   const [records, setRecords] = useState([
     {
       isExtended: "",
@@ -20,6 +19,57 @@ const ExtensionForm = (props) => {
       document: null,
     },
   ]);
+
+  const formatDate = (date) => {
+    if (!date) return "";
+    return new Date(date).toISOString().split("T")[0];
+  };
+
+  const handleSubmit = async () => {
+    try {
+      if (!props.userId) return;
+
+      const item = records[0];
+
+      const formData = new FormData();
+
+      formData.append("user_id", props.userId);
+
+      formData.append(
+        "extension_granted",
+        item.isExtended === "होय" ? "yes" : "no",
+      );
+
+      formData.append("extension_order_no", item.orderNo);
+      formData.append("extension_order_date", formatDate(item.orderDate));
+
+      formData.append(
+        "increment_withheld",
+        item.isIncrementStopped === "होय" ? "true" : "false",
+      );
+
+      formData.append("withheld_from", formatDate(item.fromDate));
+      formData.append("withheld_to", formatDate(item.toDate));
+      formData.append("withheld_order_date", formatDate(item.stopOrderDate));
+
+      formData.append("withheld_order_no", item.stopOrderNo);
+
+      if (item.document) {
+        formData.append("withheld_order_cert", item.document);
+      }
+
+      // 🔥 DEBUG
+      for (let pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
+      }
+
+      await saveServiceExtension(formData);
+
+      props.onNext();
+    } catch (err) {
+      console.error("Extension API Error:", err.response?.data || err);
+    }
+  };
 
   const yesNo = [
     { id: "होय", name: "होय" },
@@ -62,18 +112,21 @@ const ExtensionForm = (props) => {
   };
 
   return (
-    <EmployeeFormCard title="सेवा मुदतवाढ माहिती" {...props}>
+    <EmployeeFormCard
+      title="सेवा मुदतवाढ माहिती"
+      onNext={handleSubmit}
+      onPrev={props.onPrev}
+      onCancel={props.onCancel}
+      isFirst={props.isFirst}
+      isLast={props.isLast}
+    >
       <div className="space-y-6">
-
         {records.map((r, i) => (
           <div key={i} className="space-y-4">
-
             {/* Header */}
             {records.length > 1 && (
               <div className="flex justify-between">
-                <h3 className="text-sm font-semibold">
-                  रेकॉर्ड {i + 1}
-                </h3>
+                <h3 className="text-sm font-semibold">रेकॉर्ड {i + 1}</h3>
                 <button
                   onClick={() => removeRow(i)}
                   className="text-red-500 text-xs"
@@ -85,7 +138,6 @@ const ExtensionForm = (props) => {
 
             {/* Form */}
             <div className="grid grid-cols-2 gap-4">
-
               {/* मुदतवाढ */}
               <div>
                 <label className="text-sm font-medium">
@@ -93,7 +145,9 @@ const ExtensionForm = (props) => {
                 </label>
                 <DropdownSearch
                   value={r.isExtended}
-                  onChange={(e) => handleChange(i, "isExtended", e.target.value)}
+                  onChange={(e) =>
+                    handleChange(i, "isExtended", e.target.value)
+                  }
                   options={yesNo}
                   placeholder="निवडा"
                 />
@@ -118,7 +172,9 @@ const ExtensionForm = (props) => {
                 </label>
                 <DropdownSearch
                   value={r.isIncrementStopped}
-                  onChange={(e) => handleChange(i, "isIncrementStopped", e.target.value)}
+                  onChange={(e) =>
+                    handleChange(i, "isIncrementStopped", e.target.value)
+                  }
                   options={yesNo}
                   placeholder="निवडा"
                 />
@@ -159,7 +215,6 @@ const ExtensionForm = (props) => {
                   onChange={(e) => handleFile(i, e.target.files[0])}
                 />
               </div>
-
             </div>
           </div>
         ))}
@@ -167,7 +222,6 @@ const ExtensionForm = (props) => {
         <button onClick={addRow} className="btn-primary">
           + रेकॉर्ड जोडा
         </button>
-
       </div>
     </EmployeeFormCard>
   );

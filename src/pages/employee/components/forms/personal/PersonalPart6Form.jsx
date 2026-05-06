@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import EmployeeFormCard from "../../../../../components/employee/layout/EmployeeFormCard";
 import FileUpload from "../../../../../components/common/FileUpload";
+import { saveStep6 } from "../../../../../services/employeeService";
 
 const PersonalPart6Form = ({
   onNext,
@@ -8,12 +9,52 @@ const PersonalPart6Form = ({
   onCancel,
   isFirst,
   isLast,
+  userId,
+  employeeData,
 }) => {
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState(null);
+
 
   const [formData, setFormData] = useState({
     photo: null,
     signature: null,
   });
+
+  const handlesubmit = async () => {
+  if (!formData.photo || !formData.signature) {
+    alert("फोटो आणि स्वाक्षरी दोन्ही आवश्यक आहेत");
+    return;
+  }
+
+  setLoading(true);
+  setError(null);
+
+  try {
+    const payload = new FormData();
+
+    payload.append("user_id", String(userId));
+    payload.append("photo", formData.photo);
+    payload.append("signature", formData.signature);
+
+    console.log([...payload.entries()]); // debug
+
+    const res = await saveStep6(payload);
+
+    console.log("STEP 6 SUCCESS:", res);
+
+    if (res) {
+      onNext();
+    }
+
+  } catch (err) {
+    console.error("STEP 6 ERROR:", err.response?.data);
+    setError(err.response?.data?.message || "Error");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleFileChange = (field, file) => {
     if (!file) return;
@@ -34,7 +75,7 @@ const PersonalPart6Form = ({
   return (
     <EmployeeFormCard
       title="वैयक्तिक माहिती - भाग 6 (फोटो व स्वाक्षरी)"
-      onNext={onNext}
+       onNext={handlesubmit} 
       onPrev={onPrev}
       onCancel={onCancel}
       isFirst={isFirst}

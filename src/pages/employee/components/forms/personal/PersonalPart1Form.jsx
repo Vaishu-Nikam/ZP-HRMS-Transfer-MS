@@ -62,7 +62,6 @@ const styles = {
 const PersonalPart1Form = ({ onNext, onPrev, onCancel, isFirst, isLast, userId }) => {
 
   const [formData, setFormData] = useState({
-    user_id:"",
     salutation: "",
     first_name: "",
     middle_name: "",
@@ -96,7 +95,7 @@ const PersonalPart1Form = ({ onNext, onPrev, onCancel, isFirst, isLast, userId }
   };
 
   const titleOptions   = ["श्री", "श्रीमती", "कु", "डॉ"];
-  const bloodGroupOpts = ["A+", "A−", "B+", "B−", "O+", "O−", "AB+", "AB−"];
+  const bloodGroupOpts = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
   const genderOptions  = [{ id: 1, name: "पुरुष" }, { id: 2, name: "स्त्री" }];
   const religionOpts   = ["Hindu", "Muslim", "Christian", "Buddhist", "Jain", "Sikh", "Other"];
   const categoryOpts   = [
@@ -114,20 +113,56 @@ const PersonalPart1Form = ({ onNext, onPrev, onCancel, isFirst, isLast, userId }
 const handleSubmit = async () => {
   try {
     const payload = {
-      ...formData,
-      user_id: userId, 
+      user_id: Number(userId), // 🔥 FIX (employee_id → user_id)
+
+      salutation: 2, // 🔥 map कर (श्रीमती = 2)
+
+      first_name: formData.first_name,
+      middle_name: formData.middle_name,
+      last_name: formData.last_name,
+      full_name_marathi: formData.full_name_marathi || "",
+
+      father_full_name: formData.father_full_name,
+      mother_full_name: formData.mother_full_name,
+
+      name_changed: formData.name_changed, // boolean ठेव
+
+      previous_name: formData.previous_name || "",
+
+      blood_group: formData.blood_group.replace("−", "-"),
+
+      gender: Number(formData.gender),
+
+      dob: formData.dob,
+
+      phone: formData.phone,
+      pan_number: formData.pan_number,
+
+      email: formData.email,
+      govt_email: formData.govt_email || "",
+
+      religion: formData.religion,
+
+      caste_id: String(formData.caste_id), // 🔥 number → string
+
+      caste_validity_cert: formData.caste_validity_cert,
+
+      caste_validity_date: formData.caste_validity_date,
+
+      mother_tongue: formData.mother_tongue,
     };
-    console.log("STEP 1 PAYLOAD:", payload);
+
+    console.log("FINAL PAYLOAD:", payload);
 
     const res = await saveStep1(payload);
 
     console.log("SUCCESS:", res);
+
     onNext();
   } catch (err) {
     console.error("ERROR:", err.response?.data || err.message);
   }
 };
-
 
 
   const inputStyle = (extraStyle = {}) => ({ ...styles.input, ...extraStyle });

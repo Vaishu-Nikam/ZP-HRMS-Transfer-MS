@@ -2,6 +2,7 @@ import { useState } from "react";
 import EmployeeFormCard from "../../../../../components/employee/layout/EmployeeFormCard";
 import { Input } from "../../../../../components/common/Input";
 import DropdownSearch from "../../../../../components/common/DropdownSearch";
+import { saveAdvanceInfo } from "../../../../../services/employeeService";
 
 const AdvanceForm = (props) => {
 
@@ -15,6 +16,75 @@ const AdvanceForm = (props) => {
       document: null,
     },
   ]);
+
+  // 🔥 TYPE MAP
+  const typeMap = {
+    "1": "salary",
+    "2": "housing",
+    "3": "vehicle",
+    "4": "computer",
+    "5": "travel",
+    "6": "marriage",
+    "7": "medical",
+    "8": "education",
+    "9": "disaster",
+    "10": "other",
+  };
+
+  const formatDate = (date) => {
+    if (!date) return "";
+    return new Date(date).toISOString().split("T")[0];
+  };
+
+  const handleSubmit = async () => {
+    try {
+      if (!props.userId) return;
+
+      const item = records[0];
+
+      // ✅ VALIDATION
+      if (!item.type || !item.details || !item.amount || !item.isPaid || !item.certificate) {
+        console.error("All fields required");
+        return;
+      }
+
+      // 🔥 CERTIFICATE SPLIT + FIX
+      const parts = item.certificate.split("/");
+
+      const certNo = parts[0]?.trim() || "";
+      const certDateRaw = parts[1]?.trim();
+
+      const certDate = certDateRaw
+        ? formatDate(certDateRaw)
+        : formatDate(new Date()); // fallback
+
+      const payload = {
+        user_id: Number(props.userId),
+
+        advance_type: typeMap[item.type] || "",
+
+        advance_details: item.details,
+        amount: item.amount,
+
+        fully_repaid:
+          item.isPaid === "होय" ? "true" : "false",
+
+        repaid_cert_no: certNo,
+
+        // 🔥 NEVER EMPTY
+        repaid_cert_date: certDate,
+      };
+
+      console.log("FINAL PAYLOAD:", payload);
+
+      await saveAdvanceInfo(payload);
+
+      props.onNext();
+
+    } catch (err) {
+      console.error("Advance API Error:", err.response?.data || err);
+    }
+  };
 
   const yesNo = [
     { id: "होय", name: "होय" },
@@ -67,7 +137,14 @@ const AdvanceForm = (props) => {
   };
 
   return (
-    <EmployeeFormCard title="अग्रिम माहिती" {...props}>
+    <EmployeeFormCard
+      title="अग्रिम माहिती"
+      onNext={handleSubmit}
+      onPrev={props.onPrev}
+      onCancel={props.onCancel}
+      isFirst={props.isFirst}
+      isLast={props.isLast}
+    >
       <div className="space-y-6">
 
         {records.map((r, i) => (
@@ -89,7 +166,6 @@ const AdvanceForm = (props) => {
 
             <div className="grid grid-cols-2 gap-4">
 
-              {/* अग्रिम प्रकार */}
               <div>
                 <label className="text-sm font-medium">
                   अग्रिम प्रकार
@@ -98,25 +174,24 @@ const AdvanceForm = (props) => {
                   value={r.type}
                   onChange={(e) => handleChange(i, "type", e.target.value)}
                   options={advanceTypes}
-                  placeholder="निवडा"
+                  placeholder="अग्रिम प्रकार निवडा"
                 />
               </div>
 
-              {/* तपशील */}
               <Input
                 label="अग्रिम तपशील"
+                placeholder="उदा. वेतन अग्रिम तपशील"
                 value={r.details}
                 onChange={(e) => handleChange(i, "details", e.target.value)}
               />
 
-              {/* रक्कम */}
               <Input
                 label="अग्रिम रक्कम"
+                placeholder="उदा. 50000"
                 value={r.amount}
                 onChange={(e) => handleChange(i, "amount", e.target.value)}
               />
 
-              {/* परतफेड */}
               <div>
                 <label className="text-sm font-medium">
                   संपूर्ण परतफेड झाली आहे का?
@@ -125,18 +200,17 @@ const AdvanceForm = (props) => {
                   value={r.isPaid}
                   onChange={(e) => handleChange(i, "isPaid", e.target.value)}
                   options={yesNo}
-                  placeholder="निवडा"
+                  placeholder="होय / नाही निवडा"
                 />
               </div>
 
-              {/* प्रमाणपत्र */}
               <Input
                 label="प्रमाणपत्र क्रमांक / दिनांक"
+                placeholder="उदा. 123 / 2025-07-09"
                 value={r.certificate}
                 onChange={(e) => handleChange(i, "certificate", e.target.value)}
               />
 
-              {/* File Upload */}
               <div className="col-span-2">
                 <label className="text-sm font-medium">
                   प्रमाणपत्र / आदेश (2MB)

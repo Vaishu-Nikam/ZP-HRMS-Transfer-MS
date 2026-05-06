@@ -9,10 +9,8 @@ const EmployeeFormCard = ({
 }) => {
   return (
     <div className="mt-10 rounded-2xl border border-slate-200 overflow-visible bg-white shadow-xl hover:shadow-2xl transition-all duration-300">
-      
       {/* 🔷 Header strip */}
       <div className="flex items-stretch bg-blue-500/90">
-        
         {/* Tricolor */}
         <div className="flex flex-col w-1.5">
           <div className="flex-1 bg-orange-400" />
@@ -28,13 +26,10 @@ const EmployeeFormCard = ({
       </div>
 
       {/* 🔷 Body */}
-      <div className="p-6 space-y-6">
-        {children}
-      </div>
+      <div className="p-6 space-y-6">{children}</div>
 
       {/* 🔥 Footer Buttons */}
       <div className="flex justify-between px-6 py-4 bg-slate-50 border-t">
-        
         {/* Previous */}
         <button
           onClick={onPrev}
@@ -45,21 +40,15 @@ const EmployeeFormCard = ({
         </button>
 
         <div className="flex gap-3">
-          
           {/* Cancel */}
           <button onClick={onCancel} className="btn-danger">
             रद्द करा
           </button>
 
           {/* Next */}
-          <button
-            onClick={onNext}
-            disabled={isLast}
-            className="btn-primary disabled:opacity-50"
-          >
+          <button onClick={onNext} className="btn-primary">
             {isLast ? "जतन करा" : "पुढे"}
           </button>
-
         </div>
       </div>
     </div>
