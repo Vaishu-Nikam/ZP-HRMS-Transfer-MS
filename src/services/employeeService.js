@@ -1,62 +1,80 @@
 import api from "./api";
-
-// 📥 DOWNLOAD TEMPLATE
+const getData = (response) => response.data.data || response.data;
+ 
+export const registerEmployee = async (data) => {
+  const response = await api.post("/auth/register_employee", data);
+  return response.data.data || response.data;
+};
+ 
+export const getEmployees = async (params) => {
+  const response = await api.get("/system/get_employees", { params });
+  return response.data.data || response.data;
+};
+ 
 export const downloadEmployeeTemplate = async () => {
   try {
     const response = await api.get("/employee/template", {
       responseType: "blob",
     });
-
+ 
     return response.data;
   } catch (error) {
     console.error("Download Template Error:", error);
     throw error;
   }
 };
-
+ 
 // 📤 UPLOAD EXCEL
 export const uploadEmployeeExcel = async (file) => {
   try {
     const formData = new FormData();
     formData.append("file", file);
-
+ 
     const response = await api.post("/employee/upload", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     });
-
+ 
     return response.data;
   } catch (error) {
     console.error("Upload Excel Error:", error);
     throw error;
   }
-const getData = (response) => response.data.data || response.data;
-
+};
+ 
+// GET BY DEPARTMENT ID
+export const getEmployeesByDept = async (deptId) => {
+  const res = await api.get(`/system/get_employees/${deptId}`);
+  return res.data.data || res.data;
+};
+ 
+ 
+ 
+ 
 /* ================= PERSONAL INFO ================= */
-
-//  GET EMPLOYEES
-export const getEmployees = async (params) => {
-  const response = await api.get("/system/get_employees", { params });
+ 
+// ✅ GET BY ID (VIEW)
+export const getEmployeeById = async (id) => {
+  const response = await api.get(`/system/get_employees/${id}`);
   return response.data.data || response.data;
 };
-
-//  REGISTER
-export const registerEmployee = async (data) => {
-  const response = await api.post("/auth/register_employee", data);
-  return response.data.data || response.data;
+ 
+// ✅ DELETE
+export const deleteEmployee = async (id) => {
+  const response = await api.delete(`/system/delete_employee/${id}`);
+  return response.data;
 };
-
 /* =================Personal STEP 1 ================= */
-
+ 
 export const saveStep1 = async (data) => {
   const response = await api.post(
-    "/employee/profile/personal_info/1", 
+    "/employee/profile/personal_info/1",
     data
   );
   return getData(response);
 };
-
+ 
 /* ================= Personal STEP 2 ================= */
  
 export const saveStep2 = async (data) => {
@@ -66,7 +84,7 @@ export const saveStep2 = async (data) => {
   );
   return getData(response);
 };
-
+ 
 /* ================= Personal STEP 3 ================= */
  
 export const saveStep3 = async (data) => {
@@ -76,7 +94,7 @@ export const saveStep3 = async (data) => {
   );
   return getData(response);
 };
-
+ 
 /* ================= Personal STEP 4 ================= */
  
 export const saveStep4 = async (data) => {
@@ -86,7 +104,7 @@ export const saveStep4 = async (data) => {
   );
   return getData(response);
 };
-
+ 
 // Step 5 sends multipart/form-data (files + text fields)
 // Pass a FormData object — axios sets Content-Type: multipart/form-data automatically
 export const saveStep5 = async (formData) => {
@@ -99,3 +117,4 @@ export const saveStep5 = async (formData) => {
   );
   return getData(response);
 };
+

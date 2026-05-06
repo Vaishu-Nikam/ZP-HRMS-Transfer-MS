@@ -6,12 +6,11 @@ import { TableActions } from "../../components/common/TableActions";
 import toast from "react-hot-toast";
 import EmployeeRegisterForm from "./components/forms/EmployeeRegisterForm";
 import SendEmailModal from "./components/modals/SendEmailModal";
-import { getEmployees } from "../../services/employeeService";
 
-// ✅ ONLY THESE 2 IMPORTS
 import {
   downloadEmployeeTemplate,
-  uploadEmployeeExcel
+  uploadEmployeeExcel,
+  getEmployees
 } from "../../services/employeeService";
 
 const EmployeeList = () => {
@@ -20,52 +19,48 @@ const EmployeeList = () => {
   const [employees, setEmployees] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [showRegister, setShowRegister] = useState(false);
-
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [showEmailModal, setShowEmailModal] = useState(false);
 
-  // 🔷 LOAD FROM LOCAL STORAGE
+  // 🔥 LOAD DATA
   useEffect(() => {
     fetchEmployees();
   }, []);
 
-  // 🔍 SEARCH (IMPROVED)
   const fetchEmployees = async () => {
     try {
       const data = await getEmployees();
       setEmployees(Array.isArray(data) ? data : data.employees || []);
-    } catch (error) {
+    } catch {
       toast.error("Failed to load employees");
     }
   };
 
+  // 🔍 SEARCH
   const filteredData = useMemo(() => {
     return employees.filter((emp) =>
-      (emp.first_name + " " + emp.last_name)
+      `${emp.first_name || ""} ${emp.last_name || ""}`
         .toLowerCase()
         .includes(searchQuery.toLowerCase()) ||
       (emp.phone || "").toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [employees, searchQuery]);
 
-  // ❌ DELETE
+  // ❌ DELETE (FIXED user_id)
   const handleDelete = (items) => {
     if (!window.confirm("Delete employee?")) return;
 
-    const ids = items.map((item) => item.id);
-    const updated = employees.filter((emp) => !ids.includes(emp.id));
+    const ids = items.map((item) => item.user_id);
+    const updated = employees.filter((emp) => !ids.includes(emp.user_id));
 
     setEmployees(updated);
-    localStorage.setItem("employees", JSON.stringify(updated));
-
     toast.success("Deleted successfully");
   };
 
-  // 📥 DOWNLOAD EXCEL
+  // 📥 DOWNLOAD
   const handleDownloadTemplate = async () => {
     try {
       const blob = await downloadEmployeeTemplate();
-
       const url = window.URL.createObjectURL(new Blob([blob]));
       const link = document.createElement("a");
 
@@ -76,27 +71,22 @@ const EmployeeList = () => {
       link.remove();
 
       toast.success("Template downloaded");
-    } catch (error) {
-      console.error(error);
+    } catch {
       toast.error("Download failed");
     }
   };
 
-  // 📤 UPLOAD EXCEL
+  // 📤 UPLOAD
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     try {
       await uploadEmployeeExcel(file);
-
       toast.success("Excel uploaded successfully");
 
-      // ⚠️ TEMP FIX (since no GET API)
-      window.location.reload();
-
-    } catch (error) {
-      console.error(error);
+      fetchEmployees(); // refresh data
+    } catch {
       toast.error("Upload failed");
     }
   };
@@ -111,31 +101,23 @@ const EmployeeList = () => {
       {
         key: "phone",
         header: "मोबाईल",
-        render: (_, row) => (
-          <span className="text-gray-700">
-            {row.phone || <span className="text-gray-400 italic">N/A</span>}
-          </span>
-        ),
+        render: (_, row) => row.phone || "N/A",
       },
       {
         key: "designation",
         header: "पद",
-        render: (_, row) => (
-          <span className="text-gray-700">
-            {row.designation || <span className="text-gray-400 italic">N/A</span>}
-          </span>
-        ),
-        render: (_, row) => row.phone || "N/A",
+        render: (_, row) => row.designation || "N/A",
       },
       {
         key: "status",
         header: "STATUS",
         render: (_, row) => (
-          <span className={`px-3 py-1 text-xs rounded-full ${
-            row.current_step > 1
-              ? "bg-green-100 text-green-700"
-              : "bg-yellow-100 text-yellow-700"
-          }`}>
+          <span
+            className={`px-3 py-1 text-xs rounded-full ${row.current_step > 1
+                ? "bg-green-100 text-green-700"
+                : "bg-yellow-100 text-yellow-700"
+              }`}
+          >
             {row.current_step > 1 ? "Completed" : "Pending"}
           </span>
         ),
@@ -143,26 +125,22 @@ const EmployeeList = () => {
       {
         key: "actions",
         header: "ACTIONS",
-        render: (_, row) => (
+        render: (_, row, helpers) => (
           <div className="flex gap-2">
 
-            {/* ✅ FIXED NAVIGATION */}
+            {/* ✅ FIXED user_id */}
             <TableActions
-              onView={() => navigate(`/masters/employees/view/${row.id}`)}
-              onDelete={() => helpers?.onDelete?.([row])}
-            />
+              onView={() => {
+                console.log("✅ VIEW CLICKED", row.user_id);
 
-            {!row.formCompleted && (
-              <button
-                onClick={() => navigate(`/masters/employees/edit/${row.id}`)}
-                className="px-3 py-1 text-xs rounded-full border border-blue-200 text-blue-600 bg-blue-50 hover:bg-blue-100 transition"
-            <TableActions
-              onView={() => navigate(`view/${row.user_id}`)}
+                navigate(`/employees/view/${row.user_id}`)
+              }}
+              onDelete={() => helpers?.onDelete?.([row])}
             />
 
             {row.current_step === 1 && (
               <button
-                onClick={() => navigate(`edit/${row.user_id}`)}
+                onClick={() => navigate(`/employees/edit/${row.user_id}`)}
                 className="px-3 py-1 text-xs bg-blue-100 text-blue-600 rounded"
               >
                 Complete
@@ -189,7 +167,7 @@ const EmployeeList = () => {
   return (
     <div className="space-y-6">
 
-      {/* 🔷 HEADER + BUTTONS */}
+      {/* HEADER */}
       <div className="flex justify-between items-center">
         <PageHeader
           title="कर्मचारी यादी"
@@ -201,12 +179,12 @@ const EmployeeList = () => {
         <div className="flex gap-2">
           <button
             onClick={handleDownloadTemplate}
-            className="px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
+            className="px-3 py-2 bg-green-600 text-white rounded"
           >
-            Download Excel
+            Sampel Excel
           </button>
 
-          <label className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700">
+          <label className="px-3 py-2 bg-blue-600 text-white rounded cursor-pointer">
             Import Excel
             <input
               type="file"
@@ -218,53 +196,30 @@ const EmployeeList = () => {
         </div>
       </div>
 
-      {/* 🔷 TABLE */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-        <DataTable
-          columns={columns}
-          data={filteredData}
-          onSearch={setSearchQuery}
-          onDelete={handleDelete}
-          rowKey="id"
-          showRowNumbers={true}
-        />
-      </div>
-      <PageHeader
-        title="कर्मचारी यादी"
-        actionLabel="नवीन कर्मचारी जोडा"
-        onAction={() => setShowRegister(true)}
-      />
-
+      {/* TABLE */}
       <DataTable
         columns={columns}
         data={filteredData}
         onSearch={setSearchQuery}
-        rowKey="user_id"
+        onDelete={handleDelete}
+        rowKey="user_id"   // ✅ FIXED
       />
 
       {/* REGISTER MODAL */}
       {showRegister && (
         <div
-          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black/40 flex justify-center items-center"
           onClick={() => setShowRegister(false)}
         >
           <div
-            className="bg-white p-6 rounded-xl w-[600px] shadow-lg"
+            className="bg-white p-6 rounded-xl w-[600px]"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-lg font-bold mb-4">
-              कर्मचारी नोंदणी
-            </h2>
-        <div className="fixed inset-0 bg-black/40 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-xl w-[600px]">
-
             <EmployeeRegisterForm
               onClose={() => setShowRegister(false)}
-              onSuccess={(empId) => {
+              onSuccess={(id) => {
                 setShowRegister(false);
-
-                // 🔥 STEP1 ला redirect
-                navigate(`/employee/edit/${empId}`);
+                navigate(`/masters/employees/edit/${id}`);
               }}
             />
           </div>
