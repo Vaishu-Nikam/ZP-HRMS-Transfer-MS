@@ -10,6 +10,7 @@ import SendEmailModal from "./components/modals/SendEmailModal";
 import {
   downloadEmployeeTemplate,
   uploadEmployeeExcel,
+  getEmployees
   getEmployees,
   deleteEmployee,
   getEmployeeById,
@@ -24,6 +25,7 @@ const EmployeeList = () => {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [showEmailModal, setShowEmailModal] = useState(false);
 
+  // 🔥 LOAD DATA
   useEffect(() => {
     fetchEmployees();
   }, []);
@@ -37,7 +39,28 @@ const EmployeeList = () => {
     }
   };
 
+  // 🔍 SEARCH
   const filteredData = useMemo(() => {
+    return employees.filter((emp) =>
+      `${emp.first_name || ""} ${emp.last_name || ""}`
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      (emp.phone || "").toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [employees, searchQuery]);
+
+  // ❌ DELETE (FIXED user_id)
+  const handleDelete = (items) => {
+    if (!window.confirm("Delete employee?")) return;
+
+    const ids = items.map((item) => item.user_id);
+    const updated = employees.filter((emp) => !ids.includes(emp.user_id));
+
+    setEmployees(updated);
+    toast.success("Deleted successfully");
+  };
+
+  // 📥 DOWNLOAD
     return employees.filter(
       (emp) =>
         `${emp.first_name || ""} ${emp.last_name || ""}`
@@ -115,6 +138,12 @@ const EmployeeList = () => {
         header: "STATUS",
         render: (_, row) => (
           <span
+            className={`px-3 py-1 text-xs rounded-full ${row.current_step > 1
+                ? "bg-green-100 text-green-700"
+                : "bg-yellow-100 text-yellow-700"
+              }`}
+          >
+            {row.current_step > 1 ? "Completed" : "Pending"}
             className={`px-3 py-1 text-xs rounded-full ${
               row.current_step === "completed"
                 ? "bg-green-100 text-green-600"
@@ -130,6 +159,25 @@ const EmployeeList = () => {
         header: "ACTIONS",
         render: (_, row, helpers) => (
           <div className="flex gap-2">
+
+            {/* ✅ FIXED user_id */}
+            <TableActions
+              onView={() => {
+                console.log("✅ VIEW CLICKED", row.user_id);
+
+                navigate(`/employees/view/${row.user_id}`)
+              }}
+              onDelete={() => helpers?.onDelete?.([row])}
+            />
+
+            {row.current_step === 1 && (
+              <button
+                onClick={() => navigate(`/employees/edit/${row.user_id}`)}
+                className="px-3 py-1 text-xs bg-blue-100 text-blue-600 rounded"
+              >
+                Complete
+              </button>
+            )}
             <TableActions
               onView={() => navigate(`/masters/employees/view/${row.user_id}`)}
               onDelete={() => helpers?.onDelete?.([row])}
@@ -163,6 +211,7 @@ const EmployeeList = () => {
 
   return (
     <div className="space-y-6">
+
       {/* HEADER */}
       <div className="flex justify-between items-center">
         <PageHeader
@@ -177,7 +226,7 @@ const EmployeeList = () => {
             onClick={handleDownloadTemplate}
             className="px-3 py-2 bg-green-600 text-white rounded"
           >
-            Download Excel
+            Sampel Excel
           </button>
 
           <label className="px-3 py-2 bg-blue-600 text-white rounded cursor-pointer">
@@ -198,12 +247,18 @@ const EmployeeList = () => {
         data={filteredData}
         onSearch={setSearchQuery}
         onDelete={handleDelete}
+        rowKey="user_id"   // ✅ FIXED
         rowKey="user_id"
       />
 
       {/* REGISTER MODAL */}
       {showRegister && (
         <div
+          className="fixed inset-0 bg-black/40 flex justify-center items-center"
+          onClick={() => setShowRegister(false)}
+        >
+          <div
+            className="bg-white p-6 rounded-xl w-[600px]"
           className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 overflow-auto"
           onClick={() => setShowRegister(false)}
         >
@@ -215,6 +270,7 @@ const EmployeeList = () => {
               onClose={() => setShowRegister(false)}
               onSuccess={(id) => {
                 setShowRegister(false);
+                navigate(`/masters/employees/edit/${id}`);
                 navigate(`/employees/edit/${id}`);
               }}
             />
