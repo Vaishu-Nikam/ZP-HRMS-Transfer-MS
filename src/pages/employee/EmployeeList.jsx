@@ -11,6 +11,9 @@ import {
   downloadEmployeeTemplate,
   uploadEmployeeExcel,
   getEmployees
+  getEmployees,
+  deleteEmployee,
+  getEmployeeById,
 } from "../../services/employeeService";
 
 const EmployeeList = () => {
@@ -58,6 +61,28 @@ const EmployeeList = () => {
   };
 
   // 📥 DOWNLOAD
+    return employees.filter(
+      (emp) =>
+        `${emp.first_name || ""} ${emp.last_name || ""}`
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        (emp.phone || "").toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+  }, [employees, searchQuery]);
+
+  const handleDelete = async (items) => {
+    try {
+      for (const item of items) {
+        await deleteEmployee(item.user_id);
+      }
+
+      toast.success("Deleted successfully");
+      fetchEmployees();
+    } catch (error) {
+      toast.error("Delete failed");
+    }
+  };
+
   const handleDownloadTemplate = async () => {
     try {
       const blob = await downloadEmployeeTemplate();
@@ -119,6 +144,13 @@ const EmployeeList = () => {
               }`}
           >
             {row.current_step > 1 ? "Completed" : "Pending"}
+            className={`px-3 py-1 text-xs rounded-full ${
+              row.current_step === "completed"
+                ? "bg-green-100 text-green-600"
+                : "bg-yellow-100 text-yellow-600" 
+            }`}
+          >
+            {row.current_step ? "In Progress" : "Not Started"}
           </span>
         ),
       },
@@ -146,6 +178,20 @@ const EmployeeList = () => {
                 Complete
               </button>
             )}
+            <TableActions
+              onView={() => navigate(`/masters/employees/view/${row.user_id}`)}
+              onDelete={() => helpers?.onDelete?.([row])}
+            />
+
+            
+{row.current_step !== "completed" && (
+  <button
+    onClick={() => navigate(`/employees/edit/${row.user_id}`)}
+    className="px-3 py-1 text-xs bg-blue-100 text-blue-600 rounded"
+  >
+    Complete
+  </button>
+)}
 
             <button
               onClick={() => {
@@ -156,12 +202,11 @@ const EmployeeList = () => {
             >
               Email
             </button>
-
           </div>
         ),
       },
     ],
-    [navigate]
+    [navigate],
   );
 
   return (
@@ -203,6 +248,7 @@ const EmployeeList = () => {
         onSearch={setSearchQuery}
         onDelete={handleDelete}
         rowKey="user_id"   // ✅ FIXED
+        rowKey="user_id"
       />
 
       {/* REGISTER MODAL */}
@@ -213,6 +259,11 @@ const EmployeeList = () => {
         >
           <div
             className="bg-white p-6 rounded-xl w-[600px]"
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 overflow-auto"
+          onClick={() => setShowRegister(false)}
+        >
+          <div
+            className="bg-white p-6 rounded-xl w-[600px] my-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <EmployeeRegisterForm
@@ -220,6 +271,7 @@ const EmployeeList = () => {
               onSuccess={(id) => {
                 setShowRegister(false);
                 navigate(`/masters/employees/edit/${id}`);
+                navigate(`/employees/edit/${id}`);
               }}
             />
           </div>

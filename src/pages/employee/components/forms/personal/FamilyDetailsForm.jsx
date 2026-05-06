@@ -1,67 +1,125 @@
 import { useState } from "react";
 import EmployeeFormCard from "../../../../../components/employee/layout/EmployeeFormCard";
-import { Input } from "../../../../../components/common/Input";
 import DatePicker from "../../../../../components/common/DatePicker";
+import { Input } from "../../../../../components/common/Input";
+import DropdownSearch from "../../../../../components/common/DropdownSearch";
+import { savePaymentStep4 } from "../../../../../services/employeeService";
 
-const FamilyDetailsForm = ({ onNext, onPrev, onCancel, isFirst, isLast }) => {
-  const [members, setMembers] = useState([
-    {
-      title: "",
-      firstName: "",
-      middleName: "",
-      lastName: "",
-      dob: "",
-      relation: "",
-    },
+const OtherSchemeForm = ({
+  onNext,
+  onPrev,
+  onCancel,
+  isFirst,
+  isLast,
+  userId,
+}) => {
+
+  const [records, setRecords] = useState([
+    { applicable: "", type: "", approvalDate: "", salary: "", applyDate: "" }
   ]);
 
+  const yesNo = [
+    { id: "होय", name: "होय" },
+    { id: "नाही", name: "नाही" },
+  ];
+
+  // ✅ Date format
+  const formatDate = (date) => {
+    if (!date) return null;
+    const d = new Date(date);
+    return d.toISOString().split("T")[0];
+  };
+
+  // ✅ Submit
+  const handleSubmit = async () => {
+    try {
+      if (!userId) {
+        alert("User ID missing");
+        return;
+      }
+
+      for (let item of records) {
+
+        // ✅ Validation
+        if (!item.applicable) {
+          alert("कृपया 'इतर योजना लागू आहे का?' निवडा");
+          return;
+        }
+
+        if (item.applicable === "होय") {
+          if (!item.type || !item.approvalDate || !item.salary || !item.applyDate) {
+            alert("सर्व माहिती भरा");
+            return;
+          }
+        }
+
+        const payload = {
+          user_id: userId,
+          is_applicable: item.applicable === "होय" ? "true" : "false",
+          scheme_type: item.type || "",
+          approved_date: formatDate(item.approvalDate),
+          revised_pay: item.salary || "",
+          effective_date: formatDate(item.applyDate),
+        };
+
+        console.log("PAYLOAD:", payload);
+
+        await savePaymentStep4(payload);
+      }
+
+      onNext();
+
+    } catch (err) {
+      console.log("ERROR:", err);
+      console.log("RESPONSE:", err.response);
+      console.log("DATA:", err.response?.data);
+
+      alert(err.response?.data?.message || "API Error");
+    }
+  };
+
   const handleChange = (index, field, value) => {
-    const updated = [...members];
+    const updated = [...records];
     updated[index][field] = value;
-    setMembers(updated);
+    setRecords(updated);
   };
 
   const addRow = () => {
-    setMembers([
-      ...members,
-      {
-        title: "",
-        firstName: "",
-        middleName: "",
-        lastName: "",
-        dob: "",
-        relation: "",
-      },
+    setRecords([
+      ...records,
+      { applicable: "", type: "", approvalDate: "", salary: "", applyDate: "" }
     ]);
   };
 
   const removeRow = (index) => {
-    const updated = members.filter((_, i) => i !== index);
-    setMembers(updated);
+    const updated = records.filter((_, i) => i !== index);
+    setRecords(updated);
   };
 
   return (
     <EmployeeFormCard
-      title="१७. कौटुंबिक माहिती"
-      onNext={onNext}
+      title="१३. इतर वेतन योजना माहिती"
+      onNext={handleSubmit}
       onPrev={onPrev}
       onCancel={onCancel}
       isFirst={isFirst}
       isLast={isLast}
     >
-      <div className="space-y-5">
-        {members.map((member, index) => (
+      <div className="space-y-6">
+
+        {records.map((r, index) => (
           <div
             key={index}
-            className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-4"
+            className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm"
           >
-            {/* Header */}
-            <div className="flex justify-between items-center">
-              <h3 className="text-sm font-semibold text-slate-700">
-                सदस्य {index + 1}
-              </h3>
 
-              {members.length > 1 && (
+            {/* Header */}
+            <div className="flex justify-between items-center mb-4">
+              <p className="text-sm font-semibold text-slate-700">
+                रेकॉर्ड {index + 1}
+              </p>
+
+              {records.length > 1 && (
                 <button
                   onClick={() => removeRow(index)}
                   className="text-red-500 text-xs"
@@ -71,70 +129,100 @@ const FamilyDetailsForm = ({ onNext, onPrev, onCancel, isFirst, isLast }) => {
               )}
             </div>
 
-            {/* Form */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label="संज्ञा"
-                placeholder="उदा. श्री / सौ / कु"
-                value={member.title}
-                onChange={(e) => handleChange(index, "title", e.target.value)}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-              <Input
-                label="पहिले नाव"
-                placeholder="उदा. राहुल"
-                value={member.firstName}
-                onChange={(e) =>
-                  handleChange(index, "firstName", e.target.value)
-                }
-              />
+              {/* लागू आहे का */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  इतर योजना लागू आहे का?
+                </label>
+                <DropdownSearch
+                  value={r.applicable}
+                  onChange={(e) =>
+                    handleChange(index, "applicable", e.target.value)
+                  }
+                  options={yesNo}
+                  placeholder="निवडा"
+                />
+              </div>
 
-              <Input
-                label="वडिलांचे/पतीचे नाव"
-                placeholder="उदा. राम"
-                value={member.middleName}
-                onChange={(e) =>
-                  handleChange(index, "middleName", e.target.value)
-                }
-              />
+              {r.applicable === "होय" && (
+                <>
 
-              <Input
-                label="आडनाव"
-                placeholder="उदा. पाटील"
-                value={member.lastName}
-                onChange={(e) =>
-                  handleChange(index, "lastName", e.target.value)
-                }
-              />
+                  {/* योजना प्रकार */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      इतर योजनाचा प्रकार
+                    </label>
+                    <Input
+                      placeholder="उदा. 7th Pay"
+                      value={r.type}
+                      onChange={(e) =>
+                        handleChange(index, "type", e.target.value)
+                      }
+                    />
+                  </div>
 
-              <DatePicker
-                label="जन्मतारीख (dd/MM/yyyy)"
-                placeholder="दिनांक निवडा"
-                value={member.dob}
-                onChange={(val) => handleChange(index, "dob", val)}
-              />
+                  {/* मंजुरी दिनांक */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      योजना मंजूर केल्याचा दिनांक
+                    </label>
+                    <DatePicker
+                      value={r.approvalDate}
+                      onChange={(val) =>
+                        handleChange(index, "approvalDate", val)
+                      }
+                      placeholder="dd/MM/yyyy"
+                    />
+                  </div>
 
-              <Input
-                label="नाते"
-                placeholder="उदा. पत्नी / मुलगा / वडील"
-                value={member.relation}
-                onChange={(e) =>
-                  handleChange(index, "relation", e.target.value)
-                }
-              />
+                  {/* वेतन */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      नंतर निश्चित झालेले वेतन
+                    </label>
+                    <Input
+                      placeholder="उदा. 45000"
+                      value={r.salary}
+                      onChange={(e) =>
+                        handleChange(index, "salary", e.target.value)
+                      }
+                    />
+                  </div>
+
+                  {/* लागू दिनांक */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      योजना लागू केल्याचा दिनांक
+                    </label>
+                    <DatePicker
+                      value={r.applyDate}
+                      onChange={(val) =>
+                        handleChange(index, "applyDate", val)
+                      }
+                      placeholder="dd/MM/yyyy"
+                    />
+                  </div>
+
+                </>
+              )}
+
             </div>
           </div>
         ))}
 
         {/* Add Button */}
-        <div>
-          <button onClick={addRow} className="btn-primary">
-            + सदस्य जोडा
-          </button>
-        </div>
+        <button
+          onClick={addRow}
+          className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
+        >
+          + रेकॉर्ड जोडा
+        </button>
+
       </div>
     </EmployeeFormCard>
   );
 };
 
-export default FamilyDetailsForm;
+export default OtherSchemeForm;

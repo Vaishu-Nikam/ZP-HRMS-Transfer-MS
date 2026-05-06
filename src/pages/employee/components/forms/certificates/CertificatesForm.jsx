@@ -1,6 +1,7 @@
 import { useState } from "react";
 import EmployeeFormCard from "../../../../../components/employee/layout/EmployeeFormCard";
 import FileUpload from "../../../../../components/common/FileUpload";
+import { saveCertificateInfo } from "../../../../../services/employeeService";
 
 const CertificatesForm = (props) => {
 
@@ -29,8 +30,62 @@ const CertificatesForm = (props) => {
     }));
   };
 
+  // 🔥 SUBMIT FUNCTION
+  const handleSubmit = async () => {
+    try {
+      if (!props.userId) return;
+
+      const formData = new FormData();
+
+      formData.append("user_id", props.userId);
+
+      if (files.character)
+        formData.append("character_antecedents", files.character);
+
+      if (files.loyalty)
+        formData.append("constitution_oath", files.loyalty);
+
+      if (files.villageDeclaration)
+        formData.append("home_village_decl", files.villageDeclaration);
+
+      if (files.medicalCertificate)
+        formData.append("medical_cert", files.medicalCertificate);
+
+      if (files.smallFamily)
+        formData.append("small_family_pledge", files.smallFamily);
+
+      if (files.undertaking)
+        formData.append("undertaking", files.undertaking);
+
+      if (files.womenOption)
+        formData.append("medical_reimbursement_option", files.womenOption);
+
+      if (files.npsOption)
+        formData.append("nps_family_pension_option", files.npsOption);
+
+      // 🔥 DEBUG
+      for (let pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
+      }
+
+      await saveCertificateInfo(formData);
+
+      props.onNext();
+
+    } catch (err) {
+      console.error("Certificate API Error:", err.response?.data || err);
+    }
+  };
+
   return (
-    <EmployeeFormCard title="प्रमाणपत्रे माहिती" {...props}>
+    <EmployeeFormCard
+      title="प्रमाणपत्रे माहिती"
+      onNext={handleSubmit}
+      onPrev={props.onPrev}
+      onCancel={props.onCancel}
+      isFirst={props.isFirst}
+      isLast={props.isLast}
+    >
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 

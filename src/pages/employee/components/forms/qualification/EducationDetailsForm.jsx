@@ -2,9 +2,19 @@ import { useState } from "react";
 import EmployeeFormCard from "../../../../../components/employee/layout/EmployeeFormCard";
 import { Input } from "../../../../../components/common/Input";
 import DropdownSearch from "../../../../../components/common/DropdownSearch";
+import { saveEducationStep1 } from "../../../../../services/employeeService";
 
+const EducationDetailsForm = ({
+  onNext,
+  onPrev,
+  onCancel,
+  isFirst,
+  isLast,
+  userId,
+}) => {
 
-const EducationDetailsForm = (props) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const [records, setRecords] = useState([
     {
@@ -64,15 +74,92 @@ const EducationDetailsForm = (props) => {
     handleChange(i, "certificate", file);
   };
 
-  return (
-    <EmployeeFormCard title="शैक्षणिक अर्हता" {...props}>
+  // ✅ HANDLE SUBMIT (PERSONAL STYLE)
+  const handleSubmit = async () => {
+    setLoading(true);
+    setError(null);
 
+    try {
+      if (!userId) {
+        alert("User ID missing");
+        setLoading(false);
+        return;
+      }
+
+      for (let item of records) {
+
+        if (
+          !item.qualificationType ||
+          !item.institute ||
+          !item.qualification ||
+          !item.passingYear
+        ) {
+          alert("सर्व माहिती भरा");
+          setLoading(false);
+          return;
+        }
+
+        const payload = new FormData();
+
+        payload.append("user_id", String(userId));
+
+        payload.append(
+          "edu_type",
+          item.qualificationType?.id || item.qualificationType
+        );
+
+        payload.append("institution", item.institute);
+        payload.append("qualification", item.qualification);
+        payload.append("pass_year", item.passingYear);
+
+        payload.append(
+          "obtained_at",
+          new Date().toISOString().split("T")[0]
+        );
+
+        if (item.certificate) {
+          payload.append("passing_cert", item.certificate);
+        }
+
+        console.log("FORM DATA:", [...payload.entries()]);
+
+        const res = await saveEducationStep1(payload);
+
+        console.log("STEP EDUCATION SUCCESS:", res);
+      }
+
+      onNext();
+
+    } catch (err) {
+      const message =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        err.message ||
+        "काहीतरी चूक झाली";
+
+      console.error("STEP EDUCATION ERROR:", err.response?.data || err.message);
+
+      setError(message);
+
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <EmployeeFormCard
+      title="शैक्षणिक अर्हता"
+      onNext={handleSubmit}
+      onPrev={onPrev}
+      onCancel={onCancel}
+      isFirst={isFirst}
+      isLast={isLast}
+    >
       <div className="space-y-5">
 
         {records.map((r, i) => (
           <div key={i} className="bg-slate-50 rounded-xl p-4 space-y-4 shadow-sm">
 
-            {/* Header */}
             <div className="flex justify-between items-center">
               <h3 className="text-sm font-semibold text-slate-700">
                 रेकॉर्ड {i + 1}
@@ -88,10 +175,8 @@ const EducationDetailsForm = (props) => {
               )}
             </div>
 
-            {/* Form */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-              {/* प्रकार */}
               <div>
                 <label className="text-sm font-medium text-slate-700">
                   शैक्षणिक अहर्ता प्रकार
@@ -108,7 +193,6 @@ const EducationDetailsForm = (props) => {
 
               <Input
                 label="संस्था / विद्यापीठ"
-                placeholder="उदा. पुणे विद्यापीठ"
                 value={r.institute}
                 onChange={(e) =>
                   handleChange(i, "institute", e.target.value)
@@ -117,7 +201,6 @@ const EducationDetailsForm = (props) => {
 
               <Input
                 label="शैक्षणिक अहर्ता"
-                placeholder="उदा. B.Sc Computer Science"
                 value={r.qualification}
                 onChange={(e) =>
                   handleChange(i, "qualification", e.target.value)
@@ -126,14 +209,12 @@ const EducationDetailsForm = (props) => {
 
               <Input
                 label="उत्तीर्ण झालेले वर्ष"
-                placeholder="उदा. 2023"
                 value={r.passingYear}
                 onChange={(e) =>
                   handleChange(i, "passingYear", e.target.value)
                 }
               />
 
-              {/* पात्रता वेळ */}
               <div>
                 <label className="text-sm font-medium text-slate-700">
                   पात्रता कधी प्राप्त केली
@@ -148,7 +229,6 @@ const EducationDetailsForm = (props) => {
                 />
               </div>
 
-              {/* FILE */}
               <div>
                 <label className="text-sm font-medium text-slate-700">
                   प्रमाणपत्र (२ MB पर्यंत)
@@ -164,17 +244,14 @@ const EducationDetailsForm = (props) => {
               </div>
 
             </div>
-
           </div>
         ))}
 
-        {/* Add Button */}
         <button onClick={addRow} className="btn-primary">
           + रेकॉर्ड जोडा
         </button>
 
       </div>
-
     </EmployeeFormCard>
   );
 };

@@ -2,7 +2,14 @@ import { useState } from "react";
 import EmployeeFormCard from "../../../../../components/employee/layout/EmployeeFormCard";
 import DropdownSearch from "../../../../../components/common/DropdownSearch";
 
-const ServiceBookForm = (props) => {
+const ServiceBookForm = ({
+  onNext,
+  onPrev,
+  onCancel,
+  isFirst,
+  isLast,
+  setServiceBookData,
+}) => {
 
   const [records, setRecords] = useState([
     {
@@ -31,98 +38,69 @@ const ServiceBookForm = (props) => {
     handleChange(i, "document", file);
   };
 
-  const addRow = () => {
-    setRecords([
-      ...records,
-      {
-        isSecondaryBook: "",
-        isUpdated: "",
-        document: null,
-      },
-    ]);
-  };
+  const handleSubmit = () => {
+    const item = records[0];
 
-  const removeRow = (i) => {
-    setRecords(records.filter((_, index) => index !== i));
+    if (!item.isSecondaryBook || !item.isUpdated) {
+      alert("सर्व माहिती भरा");
+      return;
+    }
+
+    // 🔥 DEBUG (IMPORTANT)
+    console.log("STEP1 DATA:", item);
+
+    // 🔥 SAFETY CHECK
+    if (typeof setServiceBookData !== "function") {
+      console.error("setServiceBookData is missing ❌");
+      alert("Internal Error: Step data function missing");
+      return;
+    }
+
+    // 🔥 SET DATA PROPERLY
+    setServiceBookData({ ...item });
+
+    onNext();
   };
 
   return (
-    <EmployeeFormCard title="सेवा पुस्तक" {...props}>
-      <div className="space-y-6">
+    <EmployeeFormCard
+      title="सेवा पुस्तक"
+      onNext={handleSubmit}
+      onPrev={onPrev}
+      onCancel={onCancel}
+      isFirst={isFirst}
+      isLast={isLast}
+    >
+      <div className="grid grid-cols-2 gap-4">
 
-        {records.map((r, i) => (
-          <div key={i} className="space-y-4">
+        <DropdownSearch
+          value={records[0].isSecondaryBook}
+          onChange={(e) =>
+            handleChange(0, "isSecondaryBook", e.target.value)
+          }
+          options={yesNo}
+          placeholder="दुय्यम सेवापुस्तक मिळाले का?"
+        />
 
-            {/* Header */}
-            {records.length > 1 && (
-              <div className="flex justify-between">
-                <h3 className="text-sm font-semibold">
-                  रेकॉर्ड {i + 1}
-                </h3>
-                <button
-                  onClick={() => removeRow(i)}
-                  className="text-red-500 text-xs"
-                >
-                  हटवा
-                </button>
-              </div>
-            )}
+        <DropdownSearch
+          value={records[0].isUpdated}
+          onChange={(e) =>
+            handleChange(0, "isUpdated", e.target.value)
+          }
+          options={yesNo}
+          placeholder="अद्यावत आहे का?"
+        />
 
-            {/* Form */}
-            <div className="grid grid-cols-2 gap-4">
-
-              {/* दुय्यम सेवा पुस्तक */}
-              <div>
-                <label className="text-sm font-medium">
-                  दुय्यम सेवापुस्तक मिळाले का?
-                </label>
-                <DropdownSearch
-                  value={r.isSecondaryBook}
-                  onChange={(e) =>
-                    handleChange(i, "isSecondaryBook", e.target.value)
-                  }
-                  options={yesNo}
-                  placeholder="निवडा"
-                />
-              </div>
-
-              {/* अद्यावत आहे का */}
-              <div>
-                <label className="text-sm font-medium">
-                  अद्यावत आहे का?
-                </label>
-                <DropdownSearch
-                  value={r.isUpdated}
-                  onChange={(e) =>
-                    handleChange(i, "isUpdated", e.target.value)
-                  }
-                  options={yesNo}
-                  placeholder="निवडा"
-                />
-              </div>
-
-              {/* File Upload */}
-              <div className="col-span-2">
-                <label className="text-sm font-medium">
-                  सेवा पुस्तक (Max 60MB)
-                </label>
-                <input
-                  type="file"
-                  className="input mt-1"
-                  onChange={(e) =>
-                    handleFile(i, e.target.files[0])
-                  }
-                />
-              </div>
-
-            </div>
-          </div>
-        ))}
-
-        {/* Add Button */}
-        <button onClick={addRow} className="btn-primary">
-          + रेकॉर्ड जोडा
-        </button>
+        <div className="col-span-2">
+          <label className="text-sm font-medium">
+            सेवा पुस्तक (Max 60MB)
+          </label>
+          <input
+            type="file"
+            className="input mt-1"
+            onChange={(e) => handleFile(0, e.target.files[0])}
+          />
+        </div>
 
       </div>
     </EmployeeFormCard>
