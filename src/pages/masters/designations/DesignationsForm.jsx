@@ -11,18 +11,37 @@ import {
   getPostById
 } from '../../../services/post.service';
 
+// ✅ IMPORT DEPARTMENT API
+import { getDepartments } from '../../../services/department.service';
+
 const DesignationForm = ({ isViewMode = false }) => {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditMode = !!id;
 
   const [loading, setLoading] = useState(false);
+  const [departments, setDepartments] = useState([]);
 
   const [formData, setFormData] = useState({
     department_id: '',
     designation: '',
     total_positions: ''
   });
+
+  // ================= LOAD DEPARTMENTS =================
+  useEffect(() => {
+    fetchDepartments();
+  }, []);
+
+  const fetchDepartments = async () => {
+    try {
+      const data = await getDepartments();
+      setDepartments(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load departments");
+    }
+  };
 
   // ================= LOAD (EDIT) =================
   useEffect(() => {
@@ -56,7 +75,7 @@ const DesignationForm = ({ isViewMode = false }) => {
     e.preventDefault();
 
     if (!formData.department_id) {
-      return toast.error('Department ID is required');
+      return toast.error('Department is required');
     }
     if (!formData.designation) {
       return toast.error('Designation is required');
@@ -66,12 +85,10 @@ const DesignationForm = ({ isViewMode = false }) => {
     }
 
     const payload = {
-      department_id: Number(formData.department_id), // 🔥 important
+      department_id: Number(formData.department_id),
       designation: formData.designation,
       total_positions: Number(formData.total_positions)
     };
-
-    console.log("FINAL PAYLOAD:", payload);
 
     try {
       setLoading(true);
@@ -108,19 +125,33 @@ const DesignationForm = ({ isViewMode = false }) => {
       isViewMode={isViewMode}
       loading={loading}
     >
-      {/* Department ID */}
-      <Input
-        label="Department ID"
-        value={formData.department_id}
-        onChange={(e) =>
-          setFormData(prev => ({
-            ...prev,
-            department_id: e.target.value
-          }))
-        }
-        placeholder="Enter Department ID"
-        required
-      />
+
+      {/* 🔥 DEPARTMENT DROPDOWN */}
+      <div className="flex flex-col gap-1">
+        <label className="text-sm font-medium text-gray-700">
+          Department
+        </label>
+
+        <select
+          value={formData.department_id}
+          onChange={(e) =>
+            setFormData(prev => ({
+              ...prev,
+              department_id: e.target.value
+            }))
+          }
+          className="border rounded-lg px-3 py-2"
+          disabled={isViewMode}
+        >
+          <option value="">Select Department</option>
+
+          {departments.map(dep => (
+            <option key={dep.id} value={dep.id}>
+              {dep.name || dep.department_name}
+            </option>
+          ))}
+        </select>
+      </div>
 
       {/* Designation */}
       <Input

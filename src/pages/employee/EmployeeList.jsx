@@ -4,6 +4,7 @@ import { DataTable } from "../../components/ui/DataTable";
 import { PageHeader } from "../../components/common/PageHeader";
 import { TableActions } from "../../components/common/TableActions";
 import toast from "react-hot-toast";
+
 import EmployeeRegisterForm from "./components/forms/EmployeeRegisterForm";
 import SendEmailModal from "./components/modals/SendEmailModal";
 
@@ -12,7 +13,6 @@ import {
   uploadEmployeeExcel,
   getEmployees,
   deleteEmployee,
-  getEmployeeById,
 } from "../../services/employeeService";
 
 const EmployeeList = () => {
@@ -24,6 +24,7 @@ const EmployeeList = () => {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [showEmailModal, setShowEmailModal] = useState(false);
 
+  // ✅ LOAD EMPLOYEES
   useEffect(() => {
     fetchEmployees();
   }, []);
@@ -31,68 +32,86 @@ const EmployeeList = () => {
   const fetchEmployees = async () => {
     try {
       const data = await getEmployees();
+
       setEmployees(Array.isArray(data) ? data : data.employees || []);
-    } catch {
+    } catch (error) {
       toast.error("Failed to load employees");
     }
   };
 
+  // ✅ SEARCH
   const filteredData = useMemo(() => {
     return employees.filter(
       (emp) =>
         `${emp.first_name || ""} ${emp.last_name || ""}`
           .toLowerCase()
           .includes(searchQuery.toLowerCase()) ||
-        (emp.phone || "").toLowerCase().includes(searchQuery.toLowerCase()),
+        (emp.phone || "")
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
     );
   }, [employees, searchQuery]);
 
+  // ✅ DELETE
   const handleDelete = async (items) => {
+    if (!window.confirm("Delete employee?")) return;
+
     try {
       for (const item of items) {
         await deleteEmployee(item.user_id);
       }
 
       toast.success("Deleted successfully");
+
       fetchEmployees();
     } catch (error) {
       toast.error("Delete failed");
     }
   };
 
+  // ✅ DOWNLOAD TEMPLATE
   const handleDownloadTemplate = async () => {
     try {
       const blob = await downloadEmployeeTemplate();
+
       const url = window.URL.createObjectURL(new Blob([blob]));
+
       const link = document.createElement("a");
 
       link.href = url;
+
       link.setAttribute("download", "employee_template.xlsx");
+
       document.body.appendChild(link);
+
       link.click();
+
       link.remove();
 
       toast.success("Template downloaded");
-    } catch {
+    } catch (error) {
       toast.error("Download failed");
     }
   };
 
-  // 📤 UPLOAD
+  // ✅ UPLOAD EXCEL
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
+
     if (!file) return;
 
     try {
       await uploadEmployeeExcel(file);
+
       toast.success("Excel uploaded successfully");
 
-      fetchEmployees(); // refresh data
-    } catch {
+      fetchEmployees();
+    } catch (error) {
       toast.error("Upload failed");
     }
   };
 
+  // ✅ TABLE COLUMNS
   const columns = useMemo(
     () => [
       {
@@ -100,16 +119,19 @@ const EmployeeList = () => {
         header: "नाव",
         render: (_, row) => `${row.first_name} ${row.last_name}`,
       },
+
       {
         key: "phone",
         header: "मोबाईल",
         render: (_, row) => row.phone || "N/A",
       },
+
       {
         key: "designation",
         header: "पद",
         render: (_, row) => row.designation || "N/A",
       },
+
       {
         key: "status",
         header: "STATUS",
@@ -125,19 +147,25 @@ const EmployeeList = () => {
           </span>
         ),
       },
+
       {
         key: "actions",
         header: "ACTIONS",
+
         render: (_, row, helpers) => (
           <div className="flex gap-2">
             <TableActions
-              onView={() => navigate(`/masters/employees/view/${row.user_id}`)}
+              onView={() =>
+                navigate(`/masters/employees/view/${row.user_id}`)
+              }
               onDelete={() => helpers?.onDelete?.([row])}
             />
 
             {row.current_step !== "completed" && (
               <button
-                onClick={() => navigate(`/employees/edit/${row.user_id}`)}
+                onClick={() =>
+                  navigate(`/employees/edit/${row.user_id}`)
+                }
                 className="px-3 py-1 text-xs bg-blue-100 text-blue-600 rounded"
               >
                 Complete
@@ -157,12 +185,12 @@ const EmployeeList = () => {
         ),
       },
     ],
-    [navigate],
+    [navigate]
   );
 
   return (
     <div className="space-y-6">
-      {/* HEADER */}
+      {/* ✅ HEADER */}
       <div className="flex justify-between items-center">
         <PageHeader
           title="कर्मचारी यादी"
@@ -176,11 +204,12 @@ const EmployeeList = () => {
             onClick={handleDownloadTemplate}
             className="px-3 py-2 bg-green-600 text-white rounded"
           >
-            Download Excel
+            Sample Excel
           </button>
 
           <label className="px-3 py-2 bg-blue-600 text-white rounded cursor-pointer">
             Import Excel
+
             <input
               type="file"
               accept=".xlsx,.xls"
@@ -191,7 +220,7 @@ const EmployeeList = () => {
         </div>
       </div>
 
-      {/* TABLE */}
+      {/* ✅ TABLE */}
       <DataTable
         columns={columns}
         data={filteredData}
@@ -200,7 +229,7 @@ const EmployeeList = () => {
         rowKey="user_id"
       />
 
-      {/* REGISTER MODAL */}
+      {/* ✅ REGISTER MODAL */}
       {showRegister && (
         <div
           className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 overflow-auto"
@@ -224,7 +253,7 @@ const EmployeeList = () => {
         </div>
       )}
 
-      {/* EMAIL MODAL */}
+      {/* ✅ EMAIL MODAL */}
       {showEmailModal && (
         <SendEmailModal
           employee={selectedEmployee}

@@ -6,6 +6,8 @@ export const getDepartments = async () => {
   return res.data.data; // 🔥 ONLY THIS
 };
 
+
+
 export const getDepartmentById = async (id) => {
   const res = await api.get(`/departments/${id}`);
   return res.data.data;
