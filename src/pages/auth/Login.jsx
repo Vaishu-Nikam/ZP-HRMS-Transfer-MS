@@ -156,12 +156,20 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
-import { Lock, User, Eye, EyeOff } from "lucide-react";
+
+import {
+  Lock,
+  User,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 
 import { Input } from "../../components/common/Input";
 import { Button } from "../../components/common/Button";
+
 import { loginUser } from "../../services/admin.service";
 
+// ✅ Logos
 import indianLogo from "../../assets/indian-logo.jpg";
 import pune_zp from "../../assets/pune_zp.png";
 import maha_logo from "../../assets/maha_logo.png";
@@ -173,9 +181,13 @@ const loginSchema = z.object({
 });
 
 const Login = () => {
+
   const navigate = useNavigate();
+
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  
 
   const {
     register,
@@ -187,15 +199,18 @@ const Login = () => {
 
   // ✅ Redirect if already logged in
   useEffect(() => {
+
     const user = localStorage.getItem("user");
 
     if (user) {
       navigate("/");
     }
+
   }, [navigate]);
 
   // ✅ Login Submit
   const onSubmit = async (data) => {
+
     try {
       setLoading(true);
 
@@ -206,26 +221,69 @@ const Login = () => {
 
       console.log("Login Response:", res);
 
-      // Save Token
+      // ✅ Save Token
       if (res?.accessToken) {
-        localStorage.setItem("token", res.accessToken);
+
+        localStorage.setItem(
+          "token",
+          res.accessToken
+        );
       }
 
-      // Save User
+      // ✅ Save User
       if (res?.user) {
-        localStorage.setItem("user", JSON.stringify(res.user));
+
+        localStorage.setItem(
+          "user",
+          JSON.stringify(res.user)
+        );
       }
 
+      const user = res?.user;
+
+      console.log(user);
+
+      // ✅ Employee First Login Only
+      if (
+        user?.roles === "employee" &&
+        user?.is_verified === false
+      ) {
+
+        navigate("/change-password");
+
+        return;
+      }
+
+      // ✅ Employee Profile Incomplete
+      if (
+        user?.roles === "employee" &&
+        (
+          user?.profile_completed === false ||
+          !user?.profile_completed
+        )
+      ) {
+
+        navigate(
+          `/employees/edit/${user.user_id}`
+        );
+
+        return;
+      }
+
+      // ✅ Dashboard
       navigate("/");
 
     } catch (error) {
+
       console.error(error);
 
       alert(
         error?.response?.data?.message ||
         "Invalid Email or Password"
       );
+
     } finally {
+
       setLoading(false);
     }
   };
@@ -233,7 +291,7 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-[#f1f5f9] flex flex-col">
 
-      {/* ================= HEADER ================= */}
+     
       <header className="w-full bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 shadow-lg border-b-4 border-yellow-400">
 
         <div className="max-w-7xl mx-auto px-4 py-4">
@@ -249,9 +307,11 @@ const Login = () => {
                   alt="India Logo"
                   className="h-20 w-20 object-contain"
                 />
+
               </div>
 
               <div className="bg-white rounded-full p-2 shadow-md">
+
                 <img
                   src={pune_zp}
                   alt="Pune ZP"
@@ -271,10 +331,10 @@ const Login = () => {
               <p className="text-sm md:text-base mt-1 text-gray-200">
                 Human Resource Management System (HRMS)
               </p>
-{/* 
+
               <p className="text-xs mt-1 text-blue-100">
                 Government of Maharashtra
-              </p> */}
+              </p>
 
             </div>
 
@@ -293,7 +353,7 @@ const Login = () => {
 
       </header>
 
-      {/* ================= MAIN CONTENT ================= */}
+
       <main className="flex-1 flex items-center justify-center px-4 py-10">
 
         <div className="w-full max-w-md">
@@ -305,7 +365,7 @@ const Login = () => {
             <div className="bg-blue-800 text-white py-4 px-6 text-center">
 
               <h2 className="text-2xl font-semibold">
-                Admin Login
+                User Login
               </h2>
 
               <p className="text-sm text-blue-100 mt-1">
@@ -332,14 +392,16 @@ const Login = () => {
               {/* Password */}
               <Input
                 label="Password"
-                type={showPassword ? "text" : "password"}
+                type={
+                  showPassword
+                    ? "text"
+                    : "password"
+                }
                 icon={<Lock size={18} />}
                 endIcon={
-                  showPassword ? (
-                    <EyeOff size={18} />
-                  ) : (
-                    <Eye size={18} />
-                  )
+                  showPassword
+                    ? <EyeOff size={18} />
+                    : <Eye size={18} />
                 }
                 onEndIconClick={() =>
                   setShowPassword(!showPassword)
@@ -355,28 +417,41 @@ const Login = () => {
                 disabled={loading}
                 className="w-full bg-blue-800 hover:bg-blue-900 text-white py-3 text-base font-semibold rounded-md transition-all duration-300"
               >
-                {loading ? "Please Wait..." : "Login"}
+
+                {
+                  loading
+                    ? "Please Wait..."
+                    : "Login"
+                }
+
               </Button>
 
             </form>
 
           </div>
 
-          {/* Security Note */}
+          {/* Note */}
           <div className="mt-5 text-center text-sm text-gray-600">
-            This is an official portal of Zilla Parishad Pune.
+
+            This is an official portal of
+            Zilla Parishad Pune.
+
           </div>
 
         </div>
 
       </main>
 
-      {/* ================= FOOTER ================= */}
+
       <footer className="bg-white border-t border-gray-300 py-4">
 
         <div className="text-center text-sm text-gray-600">
-          © {new Date().getFullYear()} Zilla Parishad Pune |
+
+          © {new Date().getFullYear()}
+          {" "}
+          Zilla Parishad Pune |
           All Rights Reserved
+
         </div>
 
       </footer>
