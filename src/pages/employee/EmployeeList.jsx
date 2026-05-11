@@ -118,7 +118,7 @@ const EmployeeList = () => {
             className={`px-3 py-1 text-xs rounded-full ${
               row.current_step === "completed"
                 ? "bg-green-100 text-green-600"
-                : "bg-yellow-100 text-yellow-600" 
+                : "bg-yellow-100 text-yellow-600"
             }`}
           >
             {row.current_step ? "In Progress" : "Not Started"}
@@ -135,15 +135,14 @@ const EmployeeList = () => {
               onDelete={() => helpers?.onDelete?.([row])}
             />
 
-            
-{row.current_step !== "completed" && (
-  <button
-    onClick={() => navigate(`/employees/edit/${row.user_id}`)}
-    className="px-3 py-1 text-xs bg-blue-100 text-blue-600 rounded"
-  >
-    Complete
-  </button>
-)}
+            {row.current_step !== "completed" && (
+              <button
+                onClick={() => navigate(`/employees/edit/${row.user_id}`)}
+                className="px-3 py-1 text-xs bg-blue-100 text-blue-600 rounded"
+              >
+                Complete
+              </button>
+            )}
 
             <button
               onClick={() => {
@@ -213,9 +212,12 @@ const EmployeeList = () => {
           >
             <EmployeeRegisterForm
               onClose={() => setShowRegister(false)}
-              onSuccess={(id) => {
+              onSuccess={() => {
                 setShowRegister(false);
-                navigate(`/employees/edit/${id}`);
+
+                fetchEmployees();
+
+                toast.success("Employee registered successfully");
               }}
             />
           </div>
